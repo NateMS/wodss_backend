@@ -1,0 +1,8 @@
+{
+  "presets": ["es2015"],
+  "env": {
+    "production": {
+      "presets": ["es2015", "react-optimize", "es2015-native-modules", "@babel/preset-env"]
+    }
+  }
+}
