@@ -18,7 +18,7 @@ export function getEmployees(req, res) {
     if (err) {
       res.status(500).send(err);
     }
-    res.json({ employees });
+    res.json(employees);
   });
 }
 
@@ -29,8 +29,10 @@ export function getEmployees(req, res) {
  * @returns void
  */
 export function addEmployee(req, res) {
+  //todo: überarbeiten, damit es mit API übereinstimmt. (PW und Role werden nach aktueller Spec als Query-String übertragen, nicht im Body.
   if (!req.body.employee || !req.body.password || !req.body.role) {
     res.status(412).end();
+    return
   }
 
   const employeeVar = req.body.employee;
@@ -56,7 +58,7 @@ export function addEmployee(req, res) {
     if (err) {
       res.status(500).send(err);
     } else {
-      res.json({ employee: saved });
+      res.json(saved);
     }
   });
 }
@@ -72,7 +74,7 @@ export function getEmployee(req, res) {
     if (err) {
       res.status(500).send(err);
     }
-    res.json({ employee });
+    res.json(employee);
   });
 }
 
@@ -86,10 +88,10 @@ export function deleteEmployee(req, res) {
   Employee.findOne({ _id: req.params.id }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
+    }else {
+      employee.remove(() => {
+        res.status(204).end();
+      });
     }
-
-    employee.remove(() => {
-      res.status(204).end();
-    });
   });
 }

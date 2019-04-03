@@ -14,7 +14,7 @@ MongoDB has to be installed and running
 - employee
     - Fields
         - _id
-            - String
+            - Number
             - Required
         - password
             - String
@@ -22,12 +22,17 @@ MongoDB has to be installed and running
             - Boolean
         - firstName
             - String
+            - Required
         - lastName
             - String
+            - Required
         - emailAddress
             - String
+            - Required
+            - Unique
         - role
-            - enum ['ADMINISTRATOR', 'PROJECTMANAGER', 'DEVELOPER']
+            - String
+                - Content: enum ['ADMINISTRATOR', 'PROJECTMANAGER', 'DEVELOPER']
     - Virtuals
         - id
             - String, maps the param _id to the API-Definition of "id"

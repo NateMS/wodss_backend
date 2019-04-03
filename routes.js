@@ -1,6 +1,7 @@
 //todo: re-install authentication using JWT
 //const Authentication = require('./controllers/authentication');
 import * as EmployeeController from './controllers/employee.controller';
+import * as ProjectController from "./controllers/project.controller";
 
 const Blog = require('./controllers/blogpost');
 //const passportService = require('./services/passport');
@@ -38,5 +39,15 @@ module.exports = function (app) {
 
   // Delete a employee by id
   app.delete('/employee/:id', EmployeeController.deleteEmployee);
+
+
+  // Get all Posts
+  app.get('/project', ProjectController.getProjects);
+
+  // Get one post by id
+  //app.get('/project/:id', EmployeeController.getEmployee);
+
+  // Add a new Post
+  app.post('/project', ProjectController.addProject);
 
 };

@@ -2,13 +2,15 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const employeeSchema = new Schema({
-  active: {
-    type: Boolean,
-  },
-
-  _id: {
+  /*_id: {
     type: Number,
     required: true,
+    min: 1,
+    max: 9223372036854776000
+  },*/
+
+  active: {
+    type: Boolean,
   },
 
   firstName: {
@@ -60,7 +62,7 @@ export default mongoose.model('Employee', employeeSchema);
 active:
         type: boolean
       id:
-        type: integer
+        type: integer todo: maybe String
       firstName:
         type: string
       lastName:
