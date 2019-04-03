@@ -1,9 +1,39 @@
 # wodss
-fhnw wodss project FS19
+Backend for the wodss-application spring semester 19.
+
+## Start
+### Installing Dependencies
+`npm install`
+
+MongoDB has to be installed and running
+### Starting the server
+`npm start`
+
+## Schemas
+
+- employee
+    - Fields
+        - _id
+            - String
+            - Required
+        - password
+            - String
+        - active
+            - Boolean
+        - firstName
+            - String
+        - lastName
+            - String
+        - emailAddress
+            - String
+        - role
+            - enum ['ADMINISTRATOR', 'PROJECTMANAGER', 'DEVELOPER']
+    - Virtuals
+        - id
+            - String, maps the param _id to the API-Definition of "id"
 
 
-## tables
-
+## (obsolete) Tables
 - projects
     - project_id
     - name
