@@ -69,12 +69,18 @@ export function addProject(req, res) {
  * @param res
  * @returns void
 */
-export function getProject(req, res) {
-  Project.findOne({ _id: {$eq:req.params.id} }).exec((err, employee) => {
+export function getProject(req, res){
+  //todo: return 401 if unauthenticated or invalid token
+  //todo: return 403 if user is not allowed to get the project
+
+  Project.findOne({ _id: {$eq:req.params.id} }).exec((err, project) => {
     if (err) {
       res.status(500).send(err);
+    }else if(!project){
+      res.status(404).end();
+    }else{
+      res.json(project);
     }
-    res.json({ employee });
   });
 }
 
@@ -84,14 +90,21 @@ export function getProject(req, res) {
  * @param res
  * @returns void
 */
-export function deleteEmployee(req, res) {
-  Employee.findOne({ _id: req.params.id }).exec((err, employee) => {
+export function deleteProject(req, res) {
+  //todo: 401 if unauthenticated or invalid token
+  //todo: 403 if user is not allowed to delete this project
+
+  Project.findOne({ _id: {$eq: req.params.id} }).exec((err, project) => {
     if (err) {
       res.status(500).send(err);
+    }else if(!project){
+      res.status(404).end();
+    }else{
+      project.remove(() => {
+        res.status(204).end();
+      });
     }
-
-    employee.remove(() => {
-      res.status(204).end();
-    });
   });
 }
+
+//todo: add put-function

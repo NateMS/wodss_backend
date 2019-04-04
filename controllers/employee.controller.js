@@ -64,16 +64,21 @@ export function addEmployee(req, res) {
  * @returns void
 */
 export function getEmployee(req, res) {
+  //todo: return 401 if unauthenticated or invalid token
+
   Employee.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
+    }else if(!employee){
+      res.status(404).end();
+    }else{
+      res.json(employee);
     }
-    res.json(employee);
   });
 }
 
 /**
- * Delete a post
+ * Delete a employee
  * @param req
  * @param res
  * @returns void
@@ -89,3 +94,5 @@ export function deleteEmployee(req, res) {
     }
   });
 }
+
+//todo: add put-function

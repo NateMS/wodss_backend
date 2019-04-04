@@ -34,7 +34,7 @@ module.exports = function (app) {
    * Project-Endpoint
    */
   app.get('/api/project', ProjectController.getProjects);
-  //app.get('/api/project/:id', ProjectController.getProject);
+  app.get('/api/project/:id', ProjectController.getProject);
   app.post('/api/project', ProjectController.addProject);
-  //app.delete('/api/project/:id', ProjectController.deleteProject)
+  app.delete('/api/project/:id', ProjectController.deleteProject)
 };
