@@ -9,14 +9,31 @@ import Project from '../models/project';
 export function getProjects(req, res) {
   // todo: if unauthenticated, return 401
   // todo: if token invalid, return 401
-  // todo: add filter
+  // todo: 404 if project manager is not found
 
-  Project.find().sort('-dateAdded').exec((err, projects) => {
+  const query = {};
+
+  const pmId = req.query.projectManagerId;
+  if(pmId) {
+    query["projectManagerId"] = {$in: pmId};
+  }
+
+  const startDate = req.query.startDate;
+  if(startDate){
+    query["startDate"] = {$gte: startDate};
+  }
+
+  const endDate = req.query.endDate;
+  if(endDate){
+    query["endDate"] = {$lte: endDate};
+  }
+
+  Project.find(query).exec((err,projects) => {
     if (err) {
       res.status(500).send(err);
     }
     res.json(projects);
-  });
+  })
 }
 
 /**
@@ -26,7 +43,13 @@ export function getProjects(req, res) {
  * @returns void
  */
 export function addProject(req, res) {
-  if (!req.body.name || !req.body.ftePercentage || !req.body.startDate || !req.body.endDate || !req.body.projectManagerId) {
+  //todo: 401 if unauthenticated or invalid token
+  //todo: 403 if user is not administrator
+  if (!req.body.name
+      || !req.body.ftePercentage
+      || !req.body.startDate
+      || !req.body.endDate
+      || !req.body.projectManagerId) {
     res.status(412).end();
     return
   }
@@ -35,7 +58,7 @@ export function addProject(req, res) {
     if (err) {
       res.status(500).send(err);
     } else {
-      res.json(saved);
+      res.status(201).json(saved);
     }
   });
 }

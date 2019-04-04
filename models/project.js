@@ -26,6 +26,7 @@ const projectSchema = new Schema({
         required: true
     },
 
+    // todo: Add Reference (block insert if no employee is available)
     // Reference:
     // https://stackoverflow.com/a/26008603/2965122
     projectManagerId: {
