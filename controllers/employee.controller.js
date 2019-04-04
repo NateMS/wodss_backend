@@ -19,6 +19,7 @@ export function getEmployees(req, res) {
     }
     res.json(employees);
   });
+
 }
 
 /**
@@ -47,7 +48,7 @@ export function addEmployee(req, res) {
   newEmployee.save((err, saved) => {
     if (err) {
       if(err.message.indexOf('duplicate key error') > 0){
-        res.status(409).send(err); //todo: check if 409 is correct status code according to API definition
+        res.status(412).send(err); //todo: check if 409 is correct status code according to API definition
       }else{
         res.status(500).send(err);
       }
@@ -87,6 +88,8 @@ export function deleteEmployee(req, res) {
   Employee.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
+    }else if(!employee){
+      res.status(404).end();
     }else {
       employee.remove(() => {
         res.status(204).end();
