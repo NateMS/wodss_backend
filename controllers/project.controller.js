@@ -13,19 +13,16 @@ export function getProjects(req, res) {
 
   const query = {};
 
-  const pmId = req.query.projectManagerId;
-  if(pmId) {
-    query["projectManagerId"] = {$eq: pmId};
+  if(req.query.hasOwnProperty('projectManagerId')) {
+    query["projectManagerId"] = {$eq: req.query.projectManagerId};
   }
 
-  const startDate = req.query.startDate;
-  if(startDate){
-    query["startDate"] = {$gte: startDate};
+  if(req.query.hasOwnProperty('startDate')){
+    query["startDate"] = {$gte: req.query.startDate};
   }
 
-  const endDate = req.query.endDate;
-  if(endDate){
-    query["endDate"] = {$lte: endDate};
+  if(req.query.hasOwnProperty('endDate')){
+    query["endDate"] = {$lte: req.query.endDate};
   }
 
   Project.find(query).exec((err,projects) => {
@@ -45,11 +42,11 @@ export function getProjects(req, res) {
 export function addProject(req, res) {
   //todo: 401 if unauthenticated or invalid token
   //todo: 403 if user is not administrator
-  if (!req.body.name
-      || !req.body.ftePercentage
-      || !req.body.startDate
-      || !req.body.endDate
-      || !req.body.projectManagerId) {
+  if (!req.body.hasOwnProperty('name')
+      || !req.body.hasOwnProperty('ftePercentage')
+      || !req.body.hasOwnProperty('startDate')
+      || !req.body.hasOwnProperty('endDate')
+      || !req.body.hasOwnProperty('projectManagerId')) {
     res.status(412).end();
     return
   }
@@ -107,4 +104,41 @@ export function deleteProject(req, res) {
   });
 }
 
-//todo: add put-function
+/**
+ * Updates the specified employee
+ * @param req
+ * @param res
+ */
+export function updateProject(req, res){
+  //todo: 401 if unauthenticated or invalid token
+  //todo: 403 if user is not allowed to update this project
+
+  if(!req.body.hasOwnProperty('name')
+      || !req.body.hasOwnProperty('ftePercentage')
+      || !req.body.hasOwnProperty('startDate')
+      || !req.body.hasOwnProperty('endDate')
+      || !req.body.hasOwnProperty('projectManagerId')){
+    res.status(412).end();
+    return;
+  }
+
+  Project.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
+    if(err){
+      res.status(500).send(err);
+    }else if(!employee){
+      res.status(404).end();
+    }else{
+      employee.active = req.body.active;
+      employee.firstName = req.body.firstName;
+      employee.lastName = req.body.lastName;
+      employee.emailAddress = req.body.emailAddress;
+      employee.save((err, saved) => {
+        if(err){
+          res.status(500).send(err);
+        }else{
+          res.json(saved);
+        }
+      })
+    }
+  });
+}

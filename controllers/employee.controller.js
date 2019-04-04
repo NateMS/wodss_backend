@@ -28,12 +28,12 @@ export function getEmployees(req, res) {
  * @returns void
  */
 export function addEmployee(req, res) {
-  if (!'active' in req.body
-      || !req.body.firstName
-      || !req.body.lastName
-      || !req.body.emailAddress
-      || !req.query.password
-      || !req.query.role) {
+  if (!req.body.hasOwnProperty('active')
+      || !req.body.hasOwnProperty('firstName')
+      || !req.body.hasOwnProperty('lastName')
+      || !req.body.hasOwnProperty('emailAddress')
+      || !req.query.hasOwnProperty('password')
+      || !req.query.hasOwnProperty('role')) {
 
     res.status(412).end();
     return
@@ -47,7 +47,7 @@ export function addEmployee(req, res) {
   newEmployee.save((err, saved) => {
     if (err) {
       if(err.message.indexOf('duplicate key error') > 0){
-        res.status(409).send(err);
+        res.status(409).send(err); //todo: check if 409 is correct status code according to API definition
       }else{
         res.status(500).send(err);
       }
@@ -105,10 +105,10 @@ export function updateEmployee(req, res){
   //todo: 403 if user is not allowed to update this employee
 
   //active can't be validated the same as the others, because a value of "false" would validate to 'false' (Boolean).
-  if(!'active' in req.body
-      || !req.body.firstName
-      || !req.body.lastName
-      || !req.body.emailAddress){
+  if(!req.body.hasOwnProperty('active')
+      || !req.body.hasOwnProperty('firstName')
+      || !req.body.hasOwnProperty('lastName')
+      || !req.body.hasOwnProperty('emailAddress')){
     res.status(412).send(req.body);
     return;
   }
