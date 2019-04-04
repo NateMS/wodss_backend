@@ -1,9 +1,8 @@
-//todo: re-install authentication using JWT
+//todo: re-enable authentication using JWT
 //const Authentication = require('./controllers/authentication');
 import * as EmployeeController from './controllers/employee.controller';
 import * as ProjectController from "./controllers/project.controller";
 
-const Blog = require('./controllers/blogpost');
 //const passportService = require('./services/passport');
 //const passport = require('passport');
 
@@ -23,31 +22,19 @@ module.exports = function (app) {
 
   //app.post('/signup', Authentication.signup);
 
-  app.post('/posts', Blog.posts);
-  app.get('/posts', Blog.getPosts);
-  app.get('/posts/:id', Blog.getPost);
-  app.delete('/posts/:id', Blog.deletePost);
+  /**
+   * Employee-Endpoint
+   */
+  app.get('/api/employee', EmployeeController.getEmployees);
+  app.get('/api/employee/:id', EmployeeController.getEmployee);
+  app.post('/api/employee', EmployeeController.addEmployee);
+  app.delete('/api/employee/:id', EmployeeController.deleteEmployee);
 
-  // Get all Posts
-  app.get('/employee', EmployeeController.getEmployees);
-
-  // Get one post by id
-  app.get('/employee/:id', EmployeeController.getEmployee);
-
-  // Add a new Post
-  app.post('/employee', EmployeeController.addEmployee);
-
-  // Delete a employee by id
-  app.delete('/employee/:id', EmployeeController.deleteEmployee);
-
-
-  // Get all Posts
-  app.get('/project', ProjectController.getProjects);
-
-  // Get one post by id
-  //app.get('/project/:id', EmployeeController.getEmployee);
-
-  // Add a new Post
-  app.post('/project', ProjectController.addProject);
-
+  /**
+   * Project-Endpoint
+   */
+  app.get('/api/project', ProjectController.getProjects);
+  //app.get('/api/project/:id', ProjectController.getProject);
+  app.post('/api/project', ProjectController.addProject);
+  //app.delete('/api/project/:id', ProjectController.deleteProject)
 };

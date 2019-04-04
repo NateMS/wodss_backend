@@ -1,5 +1,4 @@
 import Employee from '../models/employee';
-import sanitizeHtml from 'sanitize-html';
 import bcrypt from 'bcrypt';
 
 const saltRounds = 10;
@@ -23,40 +22,35 @@ export function getEmployees(req, res) {
 }
 
 /**
- * Save a post
+ * Save a new employee
  * @param req
  * @param res
  * @returns void
  */
 export function addEmployee(req, res) {
-  //todo: überarbeiten, damit es mit API übereinstimmt. (PW und Role werden nach aktueller Spec als Query-String übertragen, nicht im Body.
-  if (!req.body.employee || !req.body.password || !req.body.role) {
+  if (!req.body.active
+      || !req.body.firstName
+      || !req.body.lastName
+      || !req.body.emailAddress
+      || !req.query.password
+      || !req.query.role) {
+
     res.status(412).end();
     return
   }
 
-  const employeeVar = req.body.employee;
-
-  // remove id and change to _id, to comply with MongoDB-ID as well as API definition
-  // const idTmp = employeeVar.id;
-  // delete employeeVar.id;
-  // employeeVar._id = idTmp;
-
-  employeeVar.role = req.body.role;
-
   const salt = bcrypt.genSaltSync(saltRounds);
-  employeeVar.password = bcrypt.hashSync(req.body.password, salt);
-
-  const newEmployee = new Employee(employeeVar);
-
-  // Let's sanitize inputs
-  newEmployee.firstName = sanitizeHtml(newEmployee.firstName);
-  newEmployee.lastName = sanitizeHtml(newEmployee.lastName);
-  newEmployee.emailAddress = sanitizeHtml(newEmployee.emailAddress);
+  const newEmployee = new Employee(req.body);
+  newEmployee.password = bcrypt.hashSync(req.query.password, salt);
+  newEmployee.role = req.query.role;
 
   newEmployee.save((err, saved) => {
     if (err) {
-      res.status(500).send(err);
+      if(err.message.indexOf('duplicate key error') > 0){
+        res.status(409).send(err);
+      }else{
+        res.status(500).send(err);
+      }
     } else {
       res.json(saved);
     }
@@ -70,7 +64,7 @@ export function addEmployee(req, res) {
  * @returns void
 */
 export function getEmployee(req, res) {
-  Employee.findOne({ _id: req.params.id }).exec((err, employee) => {
+  Employee.findOne({ _id: {$in: req.params.id} }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
     }
@@ -85,7 +79,7 @@ export function getEmployee(req, res) {
  * @returns void
 */
 export function deleteEmployee(req, res) {
-  Employee.findOne({ _id: req.params.id }).exec((err, employee) => {
+  Employee.findOne({ _id: {$in: req.params.id} }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
     }else {
