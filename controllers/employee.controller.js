@@ -28,7 +28,7 @@ export function getEmployees(req, res) {
  * @returns void
  */
 export function addEmployee(req, res) {
-  if (!req.body.active
+  if (!'active' in req.body
       || !req.body.firstName
       || !req.body.lastName
       || !req.body.emailAddress
@@ -95,4 +95,41 @@ export function deleteEmployee(req, res) {
   });
 }
 
-//todo: add put-function
+/**
+ * Updates the specified employee
+ * @param req
+ * @param res
+ */
+export function updateEmployee(req, res){
+  //todo: 401 if unauthenticated or invalid token
+  //todo: 403 if user is not allowed to update this employee
+
+  //active can't be validated the same as the others, because a value of "false" would validate to 'false' (Boolean).
+  if(!'active' in req.body
+      || !req.body.firstName
+      || !req.body.lastName
+      || !req.body.emailAddress){
+    res.status(412).send(req.body);
+    return;
+  }
+
+  Employee.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
+    if(err){
+      res.status(500).send(err);
+    }else if(!employee){
+      res.status(404).end();
+    }else{
+      employee.active = req.body.active;
+      employee.firstName = req.body.firstName;
+      employee.lastName = req.body.lastName;
+      employee.emailAddress = req.body.emailAddress;
+      employee.save((err, saved) => {
+        if(err){
+          res.status(500).send(err);
+        }else{
+          res.json(saved);
+        }
+      })
+    }
+  });
+}

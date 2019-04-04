@@ -29,6 +29,7 @@ module.exports = function (app) {
   app.get('/api/employee/:id', EmployeeController.getEmployee);
   app.post('/api/employee', EmployeeController.addEmployee);
   app.delete('/api/employee/:id', EmployeeController.deleteEmployee);
+  app.put('/api/employee/:id', EmployeeController.updateEmployee);
 
   /**
    * Project-Endpoint
