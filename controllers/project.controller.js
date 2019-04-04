@@ -15,7 +15,7 @@ export function getProjects(req, res) {
 
   const pmId = req.query.projectManagerId;
   if(pmId) {
-    query["projectManagerId"] = {$in: pmId};
+    query["projectManagerId"] = {$eq: pmId};
   }
 
   const startDate = req.query.startDate;
@@ -69,8 +69,8 @@ export function addProject(req, res) {
  * @param res
  * @returns void
 */
-export function getEmployee(req, res) {
-  Employee.findOne({ _id: req.params.id }).exec((err, employee) => {
+export function getProject(req, res) {
+  Project.findOne({ _id: {$eq:req.params.id} }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
     }

@@ -64,7 +64,7 @@ export function addEmployee(req, res) {
  * @returns void
 */
 export function getEmployee(req, res) {
-  Employee.findOne({ _id: {$in: req.params.id} }).exec((err, employee) => {
+  Employee.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
     }
@@ -79,7 +79,7 @@ export function getEmployee(req, res) {
  * @returns void
 */
 export function deleteEmployee(req, res) {
-  Employee.findOne({ _id: {$in: req.params.id} }).exec((err, employee) => {
+  Employee.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
     }else {
