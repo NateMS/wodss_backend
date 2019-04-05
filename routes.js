@@ -2,6 +2,7 @@
 //const Authentication = require('./controllers/authentication');
 import * as EmployeeController from './controllers/employee.controller';
 import * as ProjectController from "./controllers/project.controller";
+import * as ContractController from "./controllers/contract.controller";
 
 //const passportService = require('./services/passport');
 //const passport = require('passport');
@@ -37,5 +38,10 @@ module.exports = function (app) {
   app.get('/api/project', ProjectController.getProjects);
   app.get('/api/project/:id', ProjectController.getProject);
   app.post('/api/project', ProjectController.addProject);
-  app.delete('/api/project/:id', ProjectController.deleteProject)
+  app.delete('/api/project/:id', ProjectController.deleteProject);
+
+  /**
+   * Contract-Endpoint
+   */
+  app.get('/api/contract', ContractController.getContracts);
 };

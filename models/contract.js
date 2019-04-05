@@ -15,7 +15,7 @@ const contractSchema = new Schema({
     },
 
     endDate: {
-      type: String,
+        type: String,
         required: true,
     },
 
@@ -27,10 +27,22 @@ const contractSchema = new Schema({
     },
 
     employeeId: {
-        type: String,
-        required: true, // vom MongoDB erzeugter Hash
+        type: String, // vom MongoDB erzeugter Hash
+        required: true,
     }
 });
+
+contractSchema.query.inRange = function(fromDate, toDate) {
+    if (typeof fromDate !== 'undefined' && typeof toDate === 'undefined') {
+        return this.find({ startDate: { $gte: fromDate } });
+    } else if (typeof fromDate === 'undefined' && typeof toDate !== 'undefined') {
+        return this.find({ endDate: { $lt: toDate } });
+    } else if (typeof fromDate !== 'undefined' && typeof toDate !== 'undefined') {
+        return this.find({ fromDate: { $gte: fromDate } , endDate: { $lt: toDate } });
+    } else {
+        return this.find();
+    }
+}
 
 contractSchema.virtual('id').get(function () { return this._id; });
 contractSchema.virtual('id').set(function (i) { this._id = i; });
