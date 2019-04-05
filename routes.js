@@ -44,4 +44,5 @@ module.exports = function (app) {
    * Contract-Endpoint
    */
   app.get('/api/contract', ContractController.getContracts);
+  app.post('/api/contract', ContractController.addContract);
 };

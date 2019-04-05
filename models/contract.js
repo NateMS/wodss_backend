@@ -19,7 +19,7 @@ const contractSchema = new Schema({
         required: true,
     },
 
-    pernsumPercentage: {
+    pensumPercentage: {
         type: Number,
         required: true,
         min: 0,
@@ -32,15 +32,38 @@ const contractSchema = new Schema({
     }
 });
 
-contractSchema.query.inRange = function(fromDate, toDate) {
-    if (typeof fromDate !== 'undefined' && typeof toDate === 'undefined') {
-        return this.find({ startDate: { $gte: fromDate } });
-    } else if (typeof fromDate === 'undefined' && typeof toDate !== 'undefined') {
-        return this.find({ endDate: { $lt: toDate } });
-    } else if (typeof fromDate !== 'undefined' && typeof toDate !== 'undefined') {
-        return this.find({ fromDate: { $gte: fromDate } , endDate: { $lt: toDate } });
-    } else {
-        return this.find();
+contractSchema.query.inRange = function(filterStartDate, filterEndDate) {
+    //wenn nur fromDate gegeben ist, dann muss startDate>=filterStartDate || startDate<=filterStartDate<=endDate
+    if (typeof filterStartDate !== 'undefined' && typeof filterEndDate === 'undefined') {
+        return this.find({
+            $or: [
+                { startDate: { $gte: filterStartDate} },
+                { $and: [
+                    { startDate: { $lte: filterStartDate },
+                        endDate: { $gte: filterStartDate }}
+            ]} ]});
+    //wenn nur toDate gegeben ist, dann muss endDate<=filterEndDate || startDate<=filterEndDate<=endDate
+    } else if (typeof filterStartDate === 'undefined' && typeof filterEndDate !== 'undefined') {
+        return this.find({
+            $or: [
+                { endDate: { $lte: filterEndDate} },
+                { $and: [
+                    { startDate: { $lte: filterEndDate },
+                        endDate: { $gte: filterEndDate }}
+                ]} ]});
+    //wenn fromDate und toDate gegeben ist, dann muss startDate>=filterFromDate && endDate<=filterEndDate
+    } else if (typeof filterStartDate !== 'undefined' && typeof filterEndDate !== 'undefined') {
+        return this.find({
+            $or: [
+                { $and: [
+                    { startDate: { $gte: filterStartDate }},
+                    { startDate: { $lte: filterEndDate }} ]},
+                { $and: [
+                    { endDate: { $gte: filterStartDate }},
+                    { endDate: { $lte: filterEndDate }} ]}
+            ]});
+    } else { //wenn gar keine Limitierungen gesetzt sind
+        return this.find(); //max 100 zurückgeben?
     }
 }
 
