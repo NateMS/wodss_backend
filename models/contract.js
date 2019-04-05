@@ -51,7 +51,8 @@ contractSchema.query.inRange = function(filterStartDate, filterEndDate) {
                     { startDate: { $lte: filterEndDate },
                         endDate: { $gte: filterEndDate }}
                 ]} ]});
-    //wenn fromDate und toDate gegeben ist, dann muss startDate>=filterFromDate && endDate<=filterEndDate
+    //wenn fromDate und toDate gegeben ist, dann muss startDate zwischen filterStartDate und filterEndDate liegen
+    //oder endDate zwischen filterStarrDate und filterEndDate
     } else if (typeof filterStartDate !== 'undefined' && typeof filterEndDate !== 'undefined') {
         return this.find({
             $or: [
