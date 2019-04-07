@@ -32,7 +32,7 @@ const contractSchema = new Schema({
     }
 });
 
-contractSchema.query.inRange = function(filterStartDate, filterEndDate) {
+contractSchema.statics.findInRange = function(filterStartDate, filterEndDate) {
     //wenn nur fromDate gegeben ist, dann muss startDate>=filterStartDate || startDate<=filterStartDate<=endDate
     if (typeof filterStartDate !== 'undefined' && typeof filterEndDate === 'undefined') {
         return this.find({
@@ -61,7 +61,10 @@ contractSchema.query.inRange = function(filterStartDate, filterEndDate) {
                     { startDate: { $lte: filterEndDate }} ]},
                 { $and: [
                     { endDate: { $gte: filterStartDate }},
-                    { endDate: { $lte: filterEndDate }} ]}
+                    { endDate: { $lte: filterEndDate }} ]},
+                { $and: [
+                    { startDate: { $lte: filterStartDate }},
+                    { endDate:   { $gte: filterEndDate }} ]}
             ]});
     } else { //wenn gar keine Limitierungen gesetzt sind
         return this.find(); //max 100 zurückgeben?

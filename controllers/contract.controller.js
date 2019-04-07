@@ -13,11 +13,11 @@ export function getContracts(req, res) {
     const fromDate = req.query.fromDate;
     const toDate = req.query.toDate;
     if(new Date(fromDate) > new Date(toDate)) {
-        res.status(412).end();  //I'd prefer Precondition Failed, because it's something the user should fix.
-        return;                 //then abort the request.
+        res.status(412).end();  //Precondition Failed, because it's something the user should fix.
+        return;
     }
 
-    Contract.inRange(fromDate, toDate).sort('-dateAdded').exec((err, contracts) => {
+    Contract.findInRange(fromDate, toDate).sort('-dateAdded').exec((err, contracts) => {
         if (err) {
             res.status(500).send(err);
         }
@@ -31,17 +31,14 @@ export function addContract(req, res) {
         || !req.body.hasOwnProperty('pensumPercentage')
         || !req.body.hasOwnProperty('employeeId')) {
 
-        console.error("fehler!");
         res.status(412).end();
         return;
     }
 
     const newContract = new Contract(req.body);
-
     newContract.save((err, saved) => {
         if (err) {
             res.status(500).send(err);
-            //todo: remove comment - it's not possible to get a duplicate key error, because no field is marked as "unique"
         } else {
             res.json(saved);
         }
