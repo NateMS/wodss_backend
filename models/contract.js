@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
+import * as autoIncrement from "mongoose-auto-increment";
 const Schema = mongoose.Schema;
 
 const contractSchema = new Schema({
-    /*_id: {
+    _id: {
       type: Number,
       required: true,
       min: 1,
       max: 9223372036854776000
-    },*/
+    },
 
     startDate: {
         type: String,
@@ -30,7 +31,7 @@ const contractSchema = new Schema({
         type: String, // vom MongoDB erzeugter Hash
         required: true,
     }
-});
+}, {_id:false} );
 
 contractSchema.statics.findInRange = function(filterStartDate, filterEndDate) {
     //wenn nur fromDate gegeben ist, dann muss startDate>=filterStartDate || startDate<=filterStartDate<=endDate
@@ -81,6 +82,9 @@ contractSchema.set('toJSON', {
         delete ret._id;
     },
 });
+
+autoIncrement.initialize(mongoose.connection);
+contractSchema.plugin(autoIncrement.plugin, "Contract");
 
 export default mongoose.model('Contract', contractSchema);
 
