@@ -12,7 +12,7 @@ require('dotenv').config();
 const app = express();
 
 //DB Setup
-mongoose.connect('mongodb://'+process.env.DB_HOST+'/'+process.env.DB_NAME, { useNewUrlParser: true, useCreateIndex: true });
+mongoose.connect('mongodb://'+(process.env.DB_HOST || 'localhost')+'/'+(process.env.DB_NAME || 'wodss'), { useNewUrlParser: true, useCreateIndex: true });
 
 
 // App Setup
