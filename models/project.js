@@ -1,7 +1,15 @@
 import mongoose from 'mongoose';
+import * as autoIncrement from "mongoose-auto-increment";
 const Schema = mongoose.Schema;
 
 const projectSchema = new Schema({
+    _id: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 9223372036854776000
+    },
+
     name: {
         type: String,
         minlength: 1,
@@ -33,7 +41,7 @@ const projectSchema = new Schema({
         type: Number,
         ref: 'Employee'
     }
-});
+}, {_id:false});
 
 projectSchema.virtual('id').get(function () { return this._id; });
 projectSchema.virtual('id').set(function (i) { this._id = i; });
@@ -45,6 +53,9 @@ projectSchema.set('toJSON', {
         delete ret._id;
     },
 });
+
+autoIncrement.initialize(mongoose.connection);
+projectSchema.plugin(autoIncrement.plugin, "Project");
 
 export default mongoose.model('Project', projectSchema);
 
