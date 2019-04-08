@@ -7,11 +7,12 @@ const morgan = require('morgan');
 const route = require('./routes');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 
 //DB Setup
-mongoose.connect('mongodb://localhost/wodss', { useNewUrlParser: true, useCreateIndex: true });
+mongoose.connect('mongodb://'+process.env.DB_HOST+'/'+process.env.DB_NAME, { useNewUrlParser: true, useCreateIndex: true });
 
 
 // App Setup

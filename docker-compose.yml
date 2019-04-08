@@ -1,9 +1,10 @@
 version: '3.7'
 services:
     wodss_backend:
+        build: ./
+        image: wodss/backend:latest
         container_name: wodss_backend
         restart: always
-        image: wodss/backend:latest
         ports:
           - "3000:3000"
         depends_on:
