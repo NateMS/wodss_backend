@@ -1,5 +1,6 @@
 import Employee from '../models/employee';
 import bcrypt from 'bcrypt';
+import Credentials from '../models/credentials'
 
 const saltRounds = 10;
 
@@ -42,7 +43,6 @@ export function addEmployee(req, res) {
 
   const salt = bcrypt.genSaltSync(saltRounds);
   const newEmployee = new Employee(req.body);
-  newEmployee.password = bcrypt.hashSync(req.query.password, salt);
   newEmployee.role = req.query.role;
 
   newEmployee.save((err, saved) => {
@@ -53,7 +53,18 @@ export function addEmployee(req, res) {
         res.status(500).send(err);
       }
     } else {
-      res.json(saved);
+      const newCredentials = new Credentials({password: bcrypt.hashSync(req.query.password, salt), emailAddress:req.query.emailAddress});
+      newCredentials.save((err, savedCred) => {
+        if(err){
+          if(err.message.indexOf('duplicate key error') > 0){
+            res.sendStatus(412);
+          }else{
+            res.status(500).send(err);
+          }
+        }else{
+          res.json(saved);
+        }
+      });
     }
   });
 }

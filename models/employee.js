@@ -39,10 +39,6 @@ const employeeSchema = new Schema({
     type: String,
     enum: ['ADMINISTRATOR', 'PROJECTMANAGER', 'DEVELOPER'],
   },
-
-  password: {
-    type: String,
-  },
 }, {_id: false });
 
 employeeSchema.virtual('id').get(function () { return this._id; });
@@ -53,7 +49,6 @@ employeeSchema.set('toJSON', {
   versionKey: false,
   transform: function (doc, ret) {
     delete ret._id;
-    delete ret.password;
   },
 });
 
