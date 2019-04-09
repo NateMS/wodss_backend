@@ -28,7 +28,7 @@ const contractSchema = new Schema({
     },
 
     employeeId: {
-        type: String, // vom MongoDB erzeugter Hash
+        type: String,
         required: true,
     }
 }, {_id:false} );
@@ -87,4 +87,3 @@ autoIncrement.initialize(mongoose.connection);
 contractSchema.plugin(autoIncrement.plugin, "Contract");
 
 export default mongoose.model('Contract', contractSchema);
-
