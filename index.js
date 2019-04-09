@@ -14,7 +14,12 @@ const app = express();
 const seeder = require('./seeder');
 
 //DB Setup
-mongoose.connect('mongodb://'+(process.env.DB_HOST || 'localhost')+'/'+(process.env.DB_NAME || 'wodss'), { useNewUrlParser: true, useCreateIndex: true });
+mongoose.connect('mongodb://'+(process.env.DB_HOST || 'localhost')+'/'+(process.env.DB_NAME || 'wodss'), { useNewUrlParser: true, useCreateIndex: true }, function() {
+    if(process.env.SEEDING) {
+        console.log('Seeding DB');
+        seeder.seedDB()
+    }
+});
 
 // App Setup
 app.use(morgan('combined'));
@@ -23,11 +28,7 @@ app.use(bodyParser.json({type: '*/*'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 route(app);
 
-//Seed
-console.log('Seeding DB');
-seeder.seedDB()
 //Server Setup
-
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 
