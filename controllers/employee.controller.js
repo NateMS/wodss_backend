@@ -1,9 +1,8 @@
 import Employee from '../models/employee';
-import bcrypt from 'bcrypt';
 import Credentials from '../models/credentials'
+import * as bcrypt from "bcrypt";
 
-const saltRounds = 10;
-
+const saltRounds = process.env.SALT_ROUNDS || 10;
 /**
  * Get all posts
  * @param req
@@ -41,9 +40,11 @@ export function addEmployee(req, res) {
     return
   }
 
-  const salt = bcrypt.genSaltSync(saltRounds);
   const newEmployee = new Employee(req.body);
   newEmployee.role = req.query.role;
+
+  const salt = bcrypt.genSaltSync(saltRounds);
+  const hashedPassword = bcrypt.hashSync(req.query.password, salt);
 
   newEmployee.save((err, saved) => {
     if (err) {
@@ -53,8 +54,11 @@ export function addEmployee(req, res) {
         res.status(500).send(err);
       }
     } else {
-      const newCredentials = new Credentials({password: bcrypt.hashSync(req.query.password, salt), emailAddress:req.query.emailAddress});
+      //Password will be hashed by the pre-save hook
+      const newCredentials = new Credentials({password: hashedPassword, emailAddress:req.body.emailAddress});
+      console.warn("New credentials created. Saving...");
       newCredentials.save((err, savedCred) => {
+        console.warn("new credentials created.");
         if(err){
           if(err.message.indexOf('duplicate key error') > 0){
             res.sendStatus(412);
@@ -62,6 +66,7 @@ export function addEmployee(req, res) {
             res.status(500).send(err);
           }
         }else{
+          console.warn("Success. Returning...");
           res.json(saved);
         }
       });

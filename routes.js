@@ -3,6 +3,7 @@
 import * as EmployeeController from './controllers/employee.controller';
 import * as ProjectController from "./controllers/project.controller";
 import * as ContractController from "./controllers/contract.controller";
+import * as TokenController from "./controllers/token.controller";
 
 //const passportService = require('./services/passport');
 //const passport = require('passport');
@@ -48,4 +49,10 @@ module.exports = function (app) {
   app.post('/api/contract', ContractController.addContract);
   app.delete('/api/contract/:id', ContractController.deleteContract);
   app.put('/api/contract/:id', ContractController.updateContract);
+
+  /**
+   * JWT-Token-Endpoint
+   */
+  app.post('/token', TokenController.createToken);
+  app.put('/token', TokenController.refreshToken);
 };
