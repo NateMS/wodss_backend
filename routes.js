@@ -1,14 +1,12 @@
 //todo: re-enable authentication using JWT
-//const Authentication = require('./controllers/authentication');
 import * as EmployeeController from './controllers/employee.controller';
 import * as ProjectController from "./controllers/project.controller";
 import * as ContractController from "./controllers/contract.controller";
 import * as TokenController from "./controllers/token.controller";
 
-//const passportService = require('./services/passport');
-//const passport = require('passport');
+const passport = require('passport');
 
-//const requireAuth = passport.authenticate('jwt', {session: false});
+const requireAuth = passport.authenticate('jwt', {session: false}, null);
 //const requireSignin = passport.authenticate('local', { session: false});
 
 module.exports = function (app) {
@@ -27,7 +25,7 @@ module.exports = function (app) {
   /**
    * Employee-Endpoint
    */
-  app.get('/api/employee', EmployeeController.getEmployees);
+  app.get('/api/employee', requireAuth, EmployeeController.getEmployees);
   app.get('/api/employee/:id', EmployeeController.getEmployee);
   app.post('/api/employee', EmployeeController.addEmployee);
   app.delete('/api/employee/:id', EmployeeController.deleteEmployee);

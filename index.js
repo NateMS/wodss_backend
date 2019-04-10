@@ -1,19 +1,20 @@
 // Main starting point of the application
 
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const route = require('./routes');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const route = require('./routes');
 
 const app = express();
 
 //DB Setup
-mongoose.connect('mongodb://'+(process.env.DB_HOST || 'localhost')+'/'+(process.env.DB_NAME || 'wodss'), { useNewUrlParser: true, useCreateIndex: true });
-
+const db_host = process.env.DB_HOST || 'localhost';
+const db_name = process.env.DB_NAME || 'wodss';
+mongoose.connect('mongodb://'+db_host+'/'+db_name, { useNewUrlParser: true, useCreateIndex: true });
 
 // App Setup
 app.use(morgan('combined'));
