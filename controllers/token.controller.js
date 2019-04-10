@@ -20,9 +20,12 @@ export function createToken(req, res) {
             if(!isMatch) { return res.status(404).send({error: "Wrong username or wrong Password"}) }
 
             const timestamp = new Date().getTime();
+            const tokenTtl = process.env.JWT_TTL || 86400;
+            const timestampExpiration = timestamp + tokenTtl;
+
             const token = jwt.encode({
                 sub: user._id,
-                iat: timestamp
+                exp: timestampExpiration
             }, process.env.JWT_SECRET);
             res.status(201).send({token});
         })
