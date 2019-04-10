@@ -12,7 +12,7 @@ const jwtLogin = new JwtStrategy(jwtOptions, function (payload, done) {
 
     // If the token is expired, return 401 Unauthorized with no further information.
     const currentTime = new Date().getTime();
-    if (payload.exp > currentTime) {
+    if (payload.exp < currentTime) {
         return done(null, false);
     }
 

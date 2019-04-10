@@ -20,7 +20,7 @@ export function createToken(req, res) {
             if(!isMatch) { return res.status(404).send({error: "Wrong username or wrong Password"}) }
 
             const timestamp = new Date().getTime();
-            const tokenTtl = process.env.JWT_TTL || 86400;
+            const tokenTtl = (Number(process.env.JWT_TTL) || 86400)*1000;
             const timestampExpiration = timestamp + tokenTtl;
 
             const token = jwt.encode({
@@ -33,33 +33,13 @@ export function createToken(req, res) {
 }
 
 export function refreshToken(req, res){
+    const timestamp = new Date().getTime();
+    const tokenTtl = (Number(process.env.JWT_TTL) || 86400)*1000;
+    const timestampExpiration = timestamp + tokenTtl;
 
-    /*if(!req.body.hasOwnProperty('name')
-        || !req.body.hasOwnProperty('ftePercentage')
-        || !req.body.hasOwnProperty('startDate')
-        || !req.body.hasOwnProperty('endDate')
-        || !req.body.hasOwnProperty('projectManagerId')){
-        res.status(412).end();
-        return;
-    }
-
-    Project.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
-        if(err){
-            res.status(500).send(err);
-        }else if(!employee){
-            res.status(404).end();
-        }else{
-            employee.active = req.body.active;
-            employee.firstName = req.body.firstName;
-            employee.lastName = req.body.lastName;
-            employee.emailAddress = req.body.emailAddress;
-            employee.save((err, saved) => {
-                if(err){
-                    res.status(500).send(err);
-                }else{
-                    res.json(saved);
-                }
-            })
-        }
-    });*/
+    const token = jwt.encode({
+        sub: req.user[0]._id,
+        exp: timestampExpiration
+    }, process.env.JWT_SECRET);
+    res.status(201).send({token});
 }
