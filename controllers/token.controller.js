@@ -30,8 +30,6 @@ export function createToken(req, res) {
 }
 
 export function refreshToken(req, res){
-    //todo: 401 if unauthenticated or invalid token
-    //todo: 403 if user is not allowed to update this project
 
     /*if(!req.body.hasOwnProperty('name')
         || !req.body.hasOwnProperty('ftePercentage')
