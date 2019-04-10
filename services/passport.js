@@ -20,7 +20,7 @@ const jwtLogin = new JwtStrategy(jwtOptions, function (payload, done) {
       return done(err, false)
     }
     if (user) {
-      done(null, user)
+        done(null, user);
     } else {
       done(null, false)
     }
