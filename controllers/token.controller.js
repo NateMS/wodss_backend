@@ -49,7 +49,6 @@ export function refreshToken(req, res){
         const timestamp = new Date().getTime();
         const tokenTtl = (Number(process.env.JWT_TTL) || 86400)*1000;
         const timestampExpiration = timestamp + tokenTtl;
-        console.warn(req.user);
         const token = jwt.encode({
             sub: req.user[0]._id,
             iss: "FHNW Wodss 2019",
