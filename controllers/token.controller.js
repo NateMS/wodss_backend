@@ -24,7 +24,7 @@ export function createToken(req, res) {
             const tokenTtl = (Number(process.env.JWT_TTL) || 86400)*1000;
             const timestampExpiration = timestamp + tokenTtl;
 
-            Employee.default.findOne({emailAddress: {$eq: req.body.emailAddress}}, function (err, e) {
+            Employee.findOne({emailAddress: {$eq: req.body.emailAddress}}, function (err, e) {
                 if(err){ return res.status(500).send(err) }
 
                 const token = jwt.encode({

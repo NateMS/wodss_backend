@@ -8,6 +8,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const route = require('./routes');
+const adminSeeder = require('./services/defaultAdminSeeder');
 
 const app = express();
 
@@ -22,6 +23,9 @@ app.use(cors());
 app.use(bodyParser.json({type: '*/*'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 route(app);
+
+// Seeding
+adminSeeder.seed();
 
 //Server Setup
 
