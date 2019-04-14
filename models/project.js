@@ -38,8 +38,8 @@ const projectSchema = new Schema({
     // Reference:
     // https://stackoverflow.com/a/26008603/2965122
     projectManagerId: {
-        type: Number,
-        ref: 'Employee'
+        type: String,
+        //ref: 'Employee'
     }
 }, {_id:false});
 

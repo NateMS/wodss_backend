@@ -16,8 +16,7 @@ const seeder = require('./seeder');
 //DB Setup
 mongoose.connect('mongodb://'+(process.env.DB_HOST || 'localhost')+'/'+(process.env.DB_NAME || 'wodss'), { useNewUrlParser: true, useCreateIndex: true }, function() {
     if(process.env.SEEDING) {
-        console.log('Seeding DB');
-        seeder.seedDB()
+        seeder.seedDB();
     }
 });
 
