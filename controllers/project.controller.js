@@ -7,8 +7,6 @@ import Project from '../models/project';
  * @returns void
  */
 export function getProjects(req, res) {
-  // todo: if unauthenticated, return 401
-  // todo: if token invalid, return 401
   // todo: 404 if project manager is not found
 
   const query = {};
@@ -40,7 +38,6 @@ export function getProjects(req, res) {
  * @returns void
  */
 export function addProject(req, res) {
-  //todo: 401 if unauthenticated or invalid token
   //todo: 403 if user is not administrator
   if (!req.body.hasOwnProperty('name')
       || !req.body.hasOwnProperty('ftePercentage')
@@ -67,7 +64,6 @@ export function addProject(req, res) {
  * @returns void
 */
 export function getProject(req, res){
-  //todo: return 401 if unauthenticated or invalid token
   //todo: return 403 if user is not allowed to get the project
 
   Project.findOne({ _id: {$eq:req.params.id} }).exec((err, project) => {
@@ -88,7 +84,6 @@ export function getProject(req, res){
  * @returns void
 */
 export function deleteProject(req, res) {
-  //todo: 401 if unauthenticated or invalid token
   //todo: 403 if user is not allowed to delete this project
 
   Project.findOne({ _id: {$eq: req.params.id} }).exec((err, project) => {
@@ -109,8 +104,8 @@ export function deleteProject(req, res) {
  * @param req
  * @param res
  */
+//todo: Code project
 export function updateProject(req, res){
-  //todo: 401 if unauthenticated or invalid token
   //todo: 403 if user is not allowed to update this project
 
   if(!req.body.hasOwnProperty('name')
