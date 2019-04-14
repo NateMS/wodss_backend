@@ -20,11 +20,18 @@ module.exports = function (app) {
   /**
    * Employee-Endpoint
    */
+  /*
   app.get('/api/employee', requireAuth, mapEmployees.map, EmployeeController.getEmployees);
   app.get('/api/employee/:id', requireAuth, mapEmployees.map, EmployeeController.getEmployee);
   app.post('/api/employee', requireAuth, mapEmployees.map, EmployeeController.addEmployee);
   app.delete('/api/employee/:id', requireAuth, mapEmployees.map, EmployeeController.deleteEmployee);
   app.put('/api/employee/:id', requireAuth, mapEmployees.map, EmployeeController.updateEmployee);
+   */
+  app.get('/api/employee',EmployeeController.getEmployees);
+  app.get('/api/employee/:id', EmployeeController.getEmployee);
+  app.post('/api/employee', EmployeeController.addEmployee);
+  app.delete('/api/employee/:id', EmployeeController.deleteEmployee);
+  app.put('/api/employee/:id', EmployeeController.updateEmployee);
 
   /**
    * Project-Endpoint

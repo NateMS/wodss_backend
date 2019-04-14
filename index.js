@@ -13,10 +13,10 @@ const seeder = require('./seeder');
 
 const app = express();
 
-DB Setup
+// DB Setup
 const db_host = process.env.DB_HOST || 'localhost';
 const db_name = process.env.DB_NAME || 'wodss';
-mongoose.connect('mongodb://'+db_host+'/'+db_name, { useNewUrlParser: true, useCreateIndex: true }, function() {});
+mongoose.connect('mongodb://'+db_host+'/'+db_name, { useNewUrlParser: true, useCreateIndex: true });
 
 // App Setup
 app.use(morgan('combined'));

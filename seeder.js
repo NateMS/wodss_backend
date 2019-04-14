@@ -1,6 +1,9 @@
 import Employee from './models/employee';
 import Project from './models/project';
 
+var employeeIds = [];
+var projectIds  = [];
+
 export function seedDB() {
     /*
      Employee Seed
@@ -40,27 +43,25 @@ export function seedDB() {
         ]
     };
 
-    var employeeIds = [];
-
     employeeSeed.employees.forEach(function (employee) {
         Employee(employee).save((error, saved) => {
             if(!error) {
-                console.log(saved.id);
                 employeeIds.push(saved.id);
+                if(employeeIds.length == employeeSeed.employees.length) {
+                    seedProjects(employeeIds);
+                }
             }
         });
     });
+}
 
-    /*
-     Project Seed
-     */
+function seedProjects(employeeIds) {
     Project.find({}).exec((_, projects) => {
         projects.forEach(function (project) {
             project.remove();
         })
     });
 
-    console.log(typeof(employeeIds[0]))
     var projectSeed = {
         'projects': [
             {
@@ -75,23 +76,21 @@ export function seedDB() {
                 ftePercentage: '1000',
                 startDate: '2019-02-01',
                 endDate: '2019-10-01',
-                projectManagerId: '1'
+                projectManagerId: employeeIds[1]
             },
             {
                 name: 'Projekt3',
                 ftePercentage: '500',
                 startDate: '2019-11-01',
                 endDate: '2020-03-01',
-                projectManagerId: '1'
+                projectManagerId: employeeIds[2]
             }
         ]
     }
 
-    var projectIds = [];
     projectSeed.projects.forEach(function (project) {
         new Project(project).save((error, saved) => {
             if(!error) {
-                console.log(saved);
                 projectIds.push(saved.id);
             }
         });
