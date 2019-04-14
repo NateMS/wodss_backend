@@ -7,9 +7,6 @@ import Contract from '../models/contract';
  * @returns void
  */
 export function getContracts(req, res) {
-    // todo: if unauthenticated, return 401
-    // todo: if token invalid, return 401
-
     const fromDate = req.query.fromDate;
     const toDate = req.query.toDate;
     if(new Date(fromDate) > new Date(toDate)) {
@@ -58,7 +55,6 @@ export function addContract(req, res) {
  * @returns void
  */
 export function getContract(req, res) {
-    //todo: return 401 if unauthenticated or invalid token
     //todo: return 403 if missing permission due to role
 
     Contract.findOne({ _id: {$eq: req.params.id} }).exec((err, contract) => {
@@ -79,7 +75,6 @@ export function getContract(req, res) {
  * @returns void
  */
 export function deleteContract(req, res) {
-    //todo: return 401 if unauthenticated or invalid token
     //todo: return 403 if missing permission due to role
 
     Contract.findOne({ _id: {$eq: req.params.id} }).exec((err, contract) => {
@@ -102,7 +97,6 @@ export function deleteContract(req, res) {
  * @param res
  */
 export function updateContract(req, res){
-    //todo: 401 if unauthenticated or invalid token
     //todo: 403 if user is not allowed to update this contract
 
     if (!req.body.hasOwnProperty('startDate')

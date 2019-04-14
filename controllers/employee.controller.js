@@ -1,8 +1,8 @@
 import Employee from '../models/employee';
-import bcrypt from 'bcrypt';
+import Credentials from '../models/credentials'
+import * as bcrypt from "bcrypt";
 
-const saltRounds = 10;
-
+const saltRounds = process.env.SALT_ROUNDS || 10;
 /**
  * Get all posts
  * @param req
@@ -10,16 +10,12 @@ const saltRounds = 10;
  * @returns void
  */
 export function getEmployees(req, res) {
-  // todo: if unauthenticated, return 401
-  // todo: if token invalid, return 401
-
-  Employee.find().sort('-dateAdded').exec((err, employees) => {
+  Employee.find().exec((err, employees) => {
     if (err) {
       res.status(500).send(err);
     }
     res.json(employees);
   });
-
 }
 
 /**
@@ -40,20 +36,36 @@ export function addEmployee(req, res) {
     return
   }
 
-  const salt = bcrypt.genSaltSync(saltRounds);
   const newEmployee = new Employee(req.body);
-  newEmployee.password = bcrypt.hashSync(req.query.password, salt);
   newEmployee.role = req.query.role;
+
+  const salt = bcrypt.genSaltSync(saltRounds);
+  const hashedPassword = bcrypt.hashSync(req.query.password, salt);
 
   newEmployee.save((err, saved) => {
     if (err) {
       if(err.message.indexOf('duplicate key error') > 0){
-        res.status(412).send(err); //todo: check if 409 is correct status code according to API definition
+        res.status(412).send(err);
       }else{
         res.status(500).send(err);
       }
     } else {
-      res.json(saved);
+      //Password will be hashed by the pre-save hook
+      const newCredentials = new Credentials({password: hashedPassword, emailAddress:req.body.emailAddress});
+      console.warn("New credentials created. Saving...");
+      newCredentials.save((err, savedCred) => {
+        console.warn("new credentials created.");
+        if(err){
+          if(err.message.indexOf('duplicate key error') > 0){
+            res.sendStatus(412);
+          }else{
+            res.status(500).send(err);
+          }
+        }else{
+          console.warn("Success. Returning...");
+          res.json(saved);
+        }
+      });
     }
   });
 }
@@ -65,8 +77,6 @@ export function addEmployee(req, res) {
  * @returns void
 */
 export function getEmployee(req, res) {
-  //todo: return 401 if unauthenticated or invalid token
-
   Employee.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
@@ -104,7 +114,6 @@ export function deleteEmployee(req, res) {
  * @param res
  */
 export function updateEmployee(req, res){
-  //todo: 401 if unauthenticated or invalid token
   //todo: 403 if user is not allowed to update this employee
 
   //active can't be validated the same as the others, because a value of "false" would validate to 'false' (Boolean).
