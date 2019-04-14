@@ -1,5 +1,6 @@
 import Credentials from '../models/credentials';
 import * as jwt from "jwt-simple";
+import Employee from '../models/employee';
 
 export function createToken(req, res) {
     if (!req.body.hasOwnProperty('emailAddress')
@@ -23,7 +24,7 @@ export function createToken(req, res) {
             const tokenTtl = (Number(process.env.JWT_TTL) || 86400)*1000;
             const timestampExpiration = timestamp + tokenTtl;
 
-            Employee.findOne({emailAddress: {$eq: req.body.emailAddress}}, function (err, e) {
+            Employee.default.findOne({emailAddress: {$eq: req.body.emailAddress}}, function (err, e) {
                 if(err){ return res.status(500).send(err) }
 
                 const token = jwt.encode({
@@ -46,7 +47,10 @@ export function refreshToken(req, res){
 
     const token = jwt.encode({
         sub: req.user[0]._id,
-        exp: timestampExpiration
+        iss: "FHNW Wodss 2019",
+        iat: timestamp,
+        exp: timestampExpiration,
+        employee: req.user[0].employee
     }, process.env.JWT_SECRET);
     res.status(201).send({token});
 }
