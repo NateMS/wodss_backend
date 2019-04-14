@@ -41,16 +41,22 @@ export function createToken(req, res) {
 }
 
 export function refreshToken(req, res){
-    const timestamp = new Date().getTime();
-    const tokenTtl = (Number(process.env.JWT_TTL) || 86400)*1000;
-    const timestampExpiration = timestamp + tokenTtl;
-
-    const token = jwt.encode({
-        sub: req.user[0]._id,
-        iss: "FHNW Wodss 2019",
-        iat: timestamp,
-        exp: timestampExpiration,
-        employee: req.user[0].employee
-    }, process.env.JWT_SECRET);
-    res.status(201).send({token});
+    const email = req.user[0].emailAddress;
+    Employee.findOne({emailAddress: {$eq: email}}, function (err, e) {
+        if(err){
+            return res.status(500).send(err);
+        }
+        const timestamp = new Date().getTime();
+        const tokenTtl = (Number(process.env.JWT_TTL) || 86400)*1000;
+        const timestampExpiration = timestamp + tokenTtl;
+        console.warn(req.user);
+        const token = jwt.encode({
+            sub: req.user[0]._id,
+            iss: "FHNW Wodss 2019",
+            iat: timestamp,
+            exp: timestampExpiration,
+            employee: e
+        }, process.env.JWT_SECRET);
+        res.status(201).send({token});
+    });
 }
