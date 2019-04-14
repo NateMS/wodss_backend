@@ -28,13 +28,15 @@ const allocationSchema = new Schema({
     },
 
     contractId: {
-        type: String,
+        type: Number,
+        ref: 'Contract',
         required: true,
     },
 
     projectId: {
-        type: String,
-        required: true,
+        type: Number,
+        ref: 'Project',
+        required: true
     }
 }, {_id:false} );
 

@@ -36,26 +36,45 @@ module.exports = function (app) {
   /**
    * Project-Endpoint
    */
+  /*
   app.get('/api/project', requireAuth, mapEmployees.map, ProjectController.getProjects);
   app.get('/api/project/:id', requireAuth, mapEmployees.map, ProjectController.getProject);
   app.post('/api/project', requireAuth, mapEmployees.map, ProjectController.addProject);
   app.delete('/api/project/:id', requireAuth, mapEmployees.map, ProjectController.deleteProject);
+   */
+
+  app.get('/api/project', ProjectController.getProjects);
+  app.get('/api/project/:id', ProjectController.getProject);
+  app.post('/api/project', ProjectController.addProject);
+  app.delete('/api/project/:id', ProjectController.deleteProject);
 
   /**
    * Contract-Endpoint
    */
+  /*
   app.get('/api/contract', requireAuth, mapEmployees.map, ContractController.getContracts);
   app.get('/api/contract/:id', requireAuth, mapEmployees.map, ContractController.getContract);
   app.post('/api/contract', requireAuth, mapEmployees.map, ContractController.addContract);
   app.delete('/api/contract/:id', requireAuth, mapEmployees.map, ContractController.deleteContract);
   app.put('/api/contract/:id', requireAuth, mapEmployees.map, ContractController.updateContract);
+   */
+  app.get('/api/contract', ContractController.getContracts);
+  app.get('/api/contract/:id', ContractController.getContract);
+  app.post('/api/contract', ContractController.addContract);
+  app.delete('/api/contract/:id', ContractController.deleteContract);
+  app.put('/api/contract/:id', ContractController.updateContract);
 
   /**
    * Allocation-Endpoint
    */
+  /*
   app.get('/api/allocation', requireAuth, mapEmployees.map, AllocationController.getAllocations);
   app.get('/api/allocation/:id', requireAuth, mapEmployees.map, AllocationController.getAllocation);
   app.get('/api/allocation', requireAuth, mapEmployees.map, AllocationController.addAllocation);
+   */
+  app.get('/api/allocation', AllocationController.getAllocations);
+  app.get('/api/allocation/:id', AllocationController.getAllocation);
+  app.get('/api/allocation', AllocationController.addAllocation);
 
   /**
    * JWT-Token-Endpoint

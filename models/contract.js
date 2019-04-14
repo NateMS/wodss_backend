@@ -28,8 +28,9 @@ const contractSchema = new Schema({
     },
 
     employeeId: {
-        type: String,
-        required: true,
+        type: Number,
+        ref: 'Employee',
+        required: true
     }
 }, {_id:false} );
 
