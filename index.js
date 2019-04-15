@@ -27,9 +27,6 @@ route(app);
 
 // Seeding
 adminSeeder.seed();
-if(process.env.SEEDING) {
-    seeder.seedDB();
-}
 
 //Server Setup
 const port = process.env.PORT || 3000;
@@ -38,3 +35,6 @@ const server = http.createServer(app);
 server.listen(port);
 
 console.log('WODSS-MERN is listening on Port', port);
+
+//export app for testing purposes
+module.exports = app;

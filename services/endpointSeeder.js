@@ -9,69 +9,42 @@ let projectIds    = [];
 let contractIds   = [];
 let allocationIds = [];
 
-export function seedDB() {
+export async function seedDB() {
+    console.log("Setting up test data");
     resetEndpoints();
-    seedEmployees();
+    await seedEndpoints();
 }
 
-function seedEmployees() {
-    console.log("Seeding /api/employees..");
-    seed.employees.forEach(function (employee) {
-        Employee(employee).save((error, saved) => {
-            if(!error) {
-                employeeIds.push(saved.id);
-                if(employeeIds.length == seed.employees.length) {
-                    seedProjects(); //Garantien, dass alle Employees hinzugefügt werden (auch die IDs im Array)
-                }
-            }
-        });
-    })
-}
+async function seedEndpoints() {
+    let i;
 
-function seedProjects() {
-    console.log("Seeding /api/projects..");
-    seed.projects.forEach(function (project) {
-        project.projectManagerId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
-        new Project(project).save((error, saved) => {
-            if(!error) {
-                projectIds.push(saved.id);
-                if(projectIds.length == seed.projects.length) {
-                    seedContracts();
-                }
-            }
-        });
-    });
-}
+    for(i=0; i < seed.employees.length; i++) {
+        let e = Employee(seed.employees[i]);
+        e = await e.save();
+        employeeIds.push(e.id);
+    }
 
-function seedContracts() {
-    console.log("Seeding /api/contracts..");
-    seed.contracts.forEach(function (contract) {
-        contract.employeeId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
-        new Contract(contract).save((error, saved) => {
-            if(!error) {
-                contractIds.push(saved.id);
-                if(contractIds.length == seed.contracts.length) {
-                    seedAllocations();
-                }
-            }
-        });
-    });
-}
+    for(i=0; i < seed.projects.length; i++) {
+        let e = Project(seed.projects[i]);
+        e.projectManagerId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
+        e = await e.save();
+        projectIds.push(e.id);
+    }
 
-function seedAllocations() {
-    console.log("Seeding /api/allocations..");
-    seed.allocations.forEach(function (allocation) {
-        allocation.contractId = contractIds[Math.floor(Math.random() * contractIds.length)];
-        allocation.projectId  = projectIds[Math.floor(Math.random() * projectIds.length)];
-        new Allocation(allocation).save((error, saved) => {
-            if(!error) {
-                allocationIds.push(saved.id);
-                if(allocationIds.length == seed.allocations.length) {
-                    console.log("Done seeding!");;
-                }
-            }
-        });
-    });
+    for(i=0; i < seed.contracts.length; i++) {
+        let e = Contract(seed.contracts[i]);
+        e.employeeId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
+        e = await e.save();
+        contractIds.push(e.id);
+    }
+
+    for(i=0; i < seed.allocations.length; i++) {
+        let e = Allocation(seed.allocations[i]);
+        e.contractId = contractIds[Math.floor(Math.random() * contractIds.length)];
+        e.projectId  = projectIds[Math.floor(Math.random() * projectIds.length)];
+        e = await e.save();
+        allocationIds.push(e.id);
+    }
 }
 
 function resetEndpoints() {
