@@ -21,7 +21,7 @@ function seedEmployees() {
             if(!error) {
                 employeeIds.push(saved.id);
                 if(employeeIds.length == seed.employees.length) {
-                    seedProjects();
+                    seedProjects(); //Garantien, dass alle Employees hinzugefügt werden (auch die IDs im Array)
                 }
             }
         });
