@@ -2,13 +2,12 @@ import Employee from '../models/employee';
 import Project from '../models/project';
 import Contract from '../models/contract';
 import Allocation from '../models/allocation';
+let seed = require('../services/seed');
 
-const mongoose = require('mongoose');
-
-var employeeIds   = [];
-var projectIds    = [];
-var contractIds   = [];
-var allocationIds = [];
+let employeeIds   = [];
+let projectIds    = [];
+let contractIds   = [];
+let allocationIds = [];
 
 export function seedDB() {
     resetEndpoints();
@@ -16,79 +15,27 @@ export function seedDB() {
 }
 
 function seedEmployees() {
-    var employeeSeed = {
-        'employees': [
-            {
-                firstName: 'Adrian',
-                lastName: 'Tute',
-                active: true,
-                emailAddress: 'adrian.tute@students.fhnw.ch',
-                role: 'ADMINISTRATOR',
-                password: "AMKJUNGE110"
-            },
-            {
-                firstName: 'Deine',
-                lastName: 'Mutter',
-                active: false,
-                emailAddress: 'deine.mutter@students.fhnw.ch',
-                role: 'PROJECTMANAGER',
-                password: "AMKJUNGE110"
-            },
-            {
-                firstName: 'Manuel',
-                lastName: 'Stutz',
-                active: true,
-                emailAddress: 'manuel.stutz@students.fhnw.ch',
-                role: 'DEVELOPER',
-                password: "AMKJUNGE110"
-            }
-        ]
-    };
-
-    employeeSeed.employees.forEach(function (employee) {
+    console.log("Seeding /api/employees..");
+    seed.employees.forEach(function (employee) {
         Employee(employee).save((error, saved) => {
             if(!error) {
                 employeeIds.push(saved.id);
-                if(employeeIds.length == employeeSeed.employees.length) {
+                if(employeeIds.length == seed.employees.length) {
                     seedProjects();
                 }
             }
         });
-    });
+    })
 }
 
 function seedProjects() {
-    var projectSeed = {
-        'projects': [
-            {
-                name: 'Projekt1',
-                ftePercentage: '1500',
-                startDate: '2018-05-03',
-                endDate: '2018-10-03',
-                projectManagerId: employeeIds[0]
-            },
-            {
-                name: 'Projekt2',
-                ftePercentage: '1000',
-                startDate: '2019-02-01',
-                endDate: '2019-10-01',
-                projectManagerId: employeeIds[1]
-            },
-            {
-                name: 'Projekt3',
-                ftePercentage: '500',
-                startDate: '2019-11-01',
-                endDate: '2020-03-01',
-                projectManagerId: employeeIds[2]
-            }
-        ]
-    }
-
-    projectSeed.projects.forEach(function (project) {
+    console.log("Seeding /api/projects..");
+    seed.projects.forEach(function (project) {
+        project.projectManagerId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
         new Project(project).save((error, saved) => {
             if(!error) {
                 projectIds.push(saved.id);
-                if(projectIds.length == projectSeed.projects.length) {
+                if(projectIds.length == seed.projects.length) {
                     seedContracts();
                 }
             }
@@ -97,34 +44,13 @@ function seedProjects() {
 }
 
 function seedContracts() {
-    var contractSeed = {
-        'contracts': [
-            {
-                startDate: '2018-05-03',
-                endDate: '2018-10-03',
-                pensumPercentage: 100,
-                employeeId: employeeIds[0]
-            },
-            {
-                startDate: '2018-05-03',
-                endDate: '2018-10-03',
-                pensumPercentage: 100,
-                employeeId: employeeIds[1]
-            },
-            {
-                startDate: '2018-05-03',
-                endDate: '2018-10-03',
-                pensumPercentage: 100,
-                employeeId: employeeIds[2]
-            }
-        ]
-    }
-
-    contractSeed.contracts.forEach(function (contract) {
+    console.log("Seeding /api/contracts..");
+    seed.contracts.forEach(function (contract) {
+        contract.employeeId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
         new Contract(contract).save((error, saved) => {
             if(!error) {
                 contractIds.push(saved.id);
-                if(contractIds.length == contractSeed.contracts.length) {
+                if(contractIds.length == seed.contracts.length) {
                     seedAllocations();
                 }
             }
@@ -133,38 +59,15 @@ function seedContracts() {
 }
 
 function seedAllocations() {
-    var allocationSeed = {
-        'allocations': [
-            {
-                startDate: '2018-05-03',
-                endDate: '2018-10-03',
-                pensumPercentage: 100,
-                contractId: contractIds[0],
-                projectId: projectIds[0]
-            },
-            {
-                startDate: '2018-05-03',
-                endDate: '2018-10-03',
-                pensumPercentage: 100,
-                contractId: contractIds[1],
-                projectId: projectIds[1]
-            },
-            {
-                startDate: '2018-05-03',
-                endDate: '2018-10-03',
-                pensumPercentage: 100,
-                contractId: contractIds[2],
-                projectId: projectIds[2]
-            }
-        ]
-    }
-
-    allocationSeed.allocations.forEach(function (allocation) {
+    console.log("Seeding /api/allocations..");
+    seed.allocations.forEach(function (allocation) {
+        allocation.contractId = contractIds[Math.floor(Math.random() * contractIds.length)];
+        allocation.projectId  = projectIds[Math.floor(Math.random() * projectIds.length)];
         new Allocation(allocation).save((error, saved) => {
             if(!error) {
                 allocationIds.push(saved.id);
-                if(allocationIds.length == allocationSeed.allocations.length) {
-                    console.log("Done seeding..");
+                if(allocationIds.length == seed.allocations.length) {
+                    console.log("Done seeding!");;
                 }
             }
         });
@@ -172,14 +75,10 @@ function seedAllocations() {
 }
 
 function resetEndpoints() {
-    Employee.deleteMany().exec().then(
-        Project.deleteMany().exec().then(
-            Allocation.deleteMany().exec().then(
-                Contract.deleteMany().exec().then(() => {
-                    return; //Garantie, dass wirklich alle gelöscht sind!
-                })
-            )
-        )
-    );
-
+    Promise.all([
+        Employee.deleteMany().exec(),
+        Project.deleteMany().exec(),
+        Allocation.deleteMany().exec(),
+        Contract.deleteMany().exec()
+    ]).then(() => { return; });
 }

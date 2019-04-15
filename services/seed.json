@@ -1,0 +1,82 @@
+{
+  "employees": [
+    {
+      "firstName": "Adrian",
+      "lastName": "Tute",
+      "active": true,
+      "emailAddress": "adrian.tute@students.fhnw.ch",
+      "role": "ADMINISTRATOR",
+      "password": "AMKJUNGE110"
+    },
+    {
+      "firstName": "Deine",
+      "lastName": "Mutter",
+      "active": false,
+      "emailAddress": "deine.mutter@students.fhnw.ch",
+      "role": "PROJECTMANAGER",
+      "password": "AMKJUNGE110"
+    },
+    {
+      "firstName": "Manuel",
+      "lastName": "Stutz",
+      "active": true,
+      "emailAddress": "manuel.stutz@students.fhnw.ch",
+      "role": "DEVELOPER",
+      "password": "AMKJUNGE110"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Projekt1",
+      "ftePercentage": "1500",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt2",
+      "ftePercentage": "1000",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt3",
+      "ftePercentage": "500",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    }
+  ],
+  "contracts": [
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    }
+  ],
+  "allocations": [
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    }
+  ]
+}
