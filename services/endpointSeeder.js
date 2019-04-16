@@ -16,7 +16,7 @@ let allocationIds = [];
 export async function seedDB() {
     console.log("Setting up test data");
     resetEndpoints();
-    await seedEndpoints();
+    //await seedEndpoints();
 }
 
 async function seedEndpoints() {

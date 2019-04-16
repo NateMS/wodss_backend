@@ -95,7 +95,7 @@ export function getEmployee(req, res) {
  * @returns void
 */
 export function deleteEmployee(req, res) {
-  if(req.employee.role === "ADMINISTRATOR") {
+  if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).end();
     return;
   }
