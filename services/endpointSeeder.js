@@ -60,6 +60,7 @@ function resetEndpoints() {
         Employee.deleteMany().exec(),
         Project.deleteMany().exec(),
         Allocation.deleteMany().exec(),
-        Contract.deleteMany().exec()
+        Contract.deleteMany().exec(),
+        Credentials.deleteMany().exec()
     ]).then(() => { return; });
 }

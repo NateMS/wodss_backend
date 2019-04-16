@@ -95,6 +95,11 @@ export function getEmployee(req, res) {
  * @returns void
 */
 export function deleteEmployee(req, res) {
+  if(req.employee.role === "DEVELOPER") {
+    res.status(403).end();
+    return;
+  }
+
   Employee.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
@@ -114,7 +119,10 @@ export function deleteEmployee(req, res) {
  * @param res
  */
 export function updateEmployee(req, res){
-  console.log(req)
+  if(req.employee.role === "DEVELOPER") {
+    res.status(403).end();
+    return;
+  }
 
   //active can't be validated the same as the others, because a value of "false" would validate to 'false' (Boolean).
   if(!req.body.hasOwnProperty('active')

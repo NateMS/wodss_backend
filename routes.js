@@ -10,7 +10,6 @@ const passport = require('passport');
 
 const mapEmployees = require('./services/employee.mapper');
 
-<<<<<<< HEAD
 const requireAuth = passport.authenticate('jwt', {session: false}, null);
 
 module.exports = function (app) {
