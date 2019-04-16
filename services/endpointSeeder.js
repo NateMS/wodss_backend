@@ -4,6 +4,10 @@ import Contract from '../models/contract';
 import Allocation from '../models/allocation';
 let seed = require('../services/seed');
 
+import * as bcrypt from "bcrypt";
+import Credentials from "../models/credentials";
+const saltRounds = 10;
+
 let employeeIds   = [];
 let projectIds    = [];
 let contractIds   = [];
@@ -20,6 +24,10 @@ async function seedEndpoints() {
 
     for(i=0; i < seed.employees.length; i++) {
         let e = Employee(seed.employees[i]);
+        const salt = bcrypt.genSaltSync(saltRounds);
+        const hashedPassword = bcrypt.hashSync(seed.employees[i].password, salt);
+        const newCredentials = new Credentials({emailAddress: e.emailAddress, password: hashedPassword});
+        await newCredentials.save();
         e = await e.save();
         employeeIds.push(e.id);
     }

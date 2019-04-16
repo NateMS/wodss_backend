@@ -27,6 +27,7 @@ route(app);
 
 // Seeding
 adminSeeder.seed();
+seeder.seedDB();
 
 //Server Setup
 const port = process.env.PORT || 3000;
