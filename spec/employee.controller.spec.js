@@ -4,40 +4,38 @@ import Employee from "../models/employee";
 
 var chai = require('chai');
 var chaiHttp = require('chai-http');
-var app = require('../index');
-var should = chai.should();
-const seeder = require('../services/endpointSeeder');
-
-const saltRounds = 10;
-
 chai.use(chaiHttp);
 
+var app = require('../index');
+var should = chai.should();
+
+const saltRounds = 10;
 let id;
 let token;
 
 const testData = {
     "employees": [
     {
-        "firstName": "Adrian",
-        "lastName": "Tute",
+        "firstName": "Admin",
+        "lastName": "VomBeruf",
         "active": true,
-        "emailAddress": "adrian.tute@students.fhnw.ch",
+        "emailAddress": "admin.vomberuf@students.fhnw.ch",
         "role": "ADMINISTRATOR",
         "password": "AMKJUNGE110"
     },
     {
-        "firstName": "Deine",
-        "lastName": "Mutter",
-        "active": false,
-        "emailAddress": "deine.mutter@students.fhnw.ch",
+        "firstName": "Wallah",
+        "lastName": "Habibi",
+        "active": true,
+        "emailAddress": "wallah.habibi@students.fhnw.ch",
         "role": "PROJECTMANAGER",
         "password": "AMKJUNGE110"
     },
     {
-        "firstName": "Manuel",
-        "lastName": "Stutz",
+        "firstName": "John",
+        "lastName": "Doe",
         "active": true,
-        "emailAddress": "manuel.stutz@students.fhnw.ch",
+        "emailAddress": "john.doe@students.fhnw.ch",
         "role": "DEVELOPER",
         "password": "AMKJUNGE110"
     }
@@ -68,11 +66,10 @@ describe('testing the employee endpoint', () => {
         }
     }, 50000);
 
-
     it('Test token', function(done) {
         chai.request(app)
             .post("/token")
-            .send({"emailAddress": "adrian.tute@students.fhnw.ch", "rawPassword": "AMKJUNGE110"})
+            .send({"emailAddress": testData.employees[0].emailAddress, "rawPassword": testData.employees[0].password})
             .end((err, res) => {
                 res.should.have.status(201);
                 token = res.body.token;
