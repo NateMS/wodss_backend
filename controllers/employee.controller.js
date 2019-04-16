@@ -114,7 +114,7 @@ export function deleteEmployee(req, res) {
  * @param res
  */
 export function updateEmployee(req, res){
-  //todo: 403 if user is not allowed to update this employee
+  console.log(req)
 
   //active can't be validated the same as the others, because a value of "false" would validate to 'false' (Boolean).
   if(!req.body.hasOwnProperty('active')

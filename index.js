@@ -9,10 +9,11 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const route = require('./routes');
 const adminSeeder = require('./services/defaultAdminSeeder');
+const seeder = require('./services/endpointSeeder');
 
 const app = express();
 
-//DB Setup
+// DB Setup
 const db_host = process.env.DB_HOST || 'localhost';
 const db_name = process.env.DB_NAME || 'wodss';
 mongoose.connect('mongodb://'+db_host+'/'+db_name, { useNewUrlParser: true, useCreateIndex: true });
@@ -26,9 +27,9 @@ route(app);
 
 // Seeding
 adminSeeder.seed();
+seeder.seedDB();
 
 //Server Setup
-
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 
@@ -36,3 +37,5 @@ server.listen(port);
 
 console.log('WODSS-MERN is listening on Port', port);
 
+//export app for testing purposes
+module.exports = app;

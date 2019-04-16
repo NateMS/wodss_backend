@@ -22,6 +22,12 @@ export function getContracts(req, res) {
     });
 }
 
+/**
+ * Save a new contract
+ * @param req
+ * @param res
+ * @returns void
+ */
 export function addContract(req, res) {
     if (!req.body.hasOwnProperty('startDate')
         || !req.body.hasOwnProperty('endDate')
@@ -91,8 +97,11 @@ export function deleteContract(req, res) {
  * @param res
  */
 export function updateContract(req, res){
-    //todo: 403 if user is not allowed to update this contract
-
+    //Test whether current user is authorized
+    if(req.employee.role !== "ADMINISTRATOR") {
+        res.status(403).end();
+        return;
+    }
     if (!req.body.hasOwnProperty('startDate')
         || !req.body.hasOwnProperty('endDate')
         || !req.body.hasOwnProperty('pensumPercentage')

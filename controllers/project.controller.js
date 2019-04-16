@@ -1,4 +1,5 @@
 import Project from '../models/project';
+import Employee from '../models/employee';
 
 /**
  * Get all posts
@@ -6,24 +7,28 @@ import Project from '../models/project';
  * @param res
  * @returns void
  */
-export function getProjects(req, res) {
-  // todo: 404 if project manager is not found
-
+export async function getProjects(req, res) {
   const query = {};
-
   if(req.query.hasOwnProperty('projectManagerId')) {
-    query["projectManagerId"] = {$eq: req.query.projectManagerId};
+    const projectManagerId = req.query.projectManagerId;
+    query["projectManagerId"] = {$eq: projectManagerId};
+
+    //Check whether projectmanager exists
+    const emp = await Employee.findById(projectManagerId).exec();
+    if(emp === null) {
+      res.status(404).end();
+      return;
+    }
   }
 
-  if(req.query.hasOwnProperty('startDate')){
-    query["startDate"] = {$gte: req.query.startDate};
+  const fromDate = req.query.fromDate;
+  const toDate = req.query.toDate;
+  if(new Date(fromDate) > new Date(toDate)) {
+    res.status(412).end();  //Precondition Failed, because it's something the user should fix.
+    return;
   }
 
-  if(req.query.hasOwnProperty('endDate')){
-    query["endDate"] = {$lte: req.query.endDate};
-  }
-
-  Project.find(query).exec((err,projects) => {
+  Project.findInRange(fromDate, toDate).find(query).sort('-dateAdded').exec((err,projects) => {
     if (err) {
       res.status(500).send(err);
     }

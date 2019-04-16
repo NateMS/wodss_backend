@@ -11,12 +11,12 @@ const contractSchema = new Schema({
     },
 
     startDate: {
-        type: String,
+        type: Date,
         required: true,
     },
 
     endDate: {
-        type: String,
+        type: Date,
         required: true,
     },
 
@@ -28,8 +28,9 @@ const contractSchema = new Schema({
     },
 
     employeeId: {
-        type: String, // vom MongoDB erzeugter Hash
-        required: true,
+        type: Number,
+        ref: 'Employee',
+        required: true
     }
 }, {_id:false} );
 
@@ -87,4 +88,3 @@ autoIncrement.initialize(mongoose.connection);
 contractSchema.plugin(autoIncrement.plugin, "Contract");
 
 export default mongoose.model('Contract', contractSchema);
-

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import * as autoIncrement from "mongoose-auto-increment";
 const Schema = mongoose.Schema;
 
-const projectSchema = new Schema({
+const allocationSchema = new Schema({
     _id: {
         type: Number,
         required: true,
@@ -10,40 +10,37 @@ const projectSchema = new Schema({
         max: 9223372036854776000
     },
 
-    name: {
-        type: String,
-        minlength: 1,
-        maxlength: 50,
-        required: true
-    },
-
-    ftePercentage: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 9223372036854776000
-    },
-
     startDate: {
         type: Date,
-        required: true
+        required: true,
     },
 
     endDate: {
         type: Date,
-        required: true
+        required: true,
     },
 
-    // todo: Add Reference (block insert if no employee is available)
-    // Reference:
-    // https://stackoverflow.com/a/26008603/2965122
-    projectManagerId: {
+    pensumPercentage: {
         type: Number,
-        ref: 'Employee'
-    }
-}, {_id:false});
+        required: true,
+        min: 0,
+        max: 100,
+    },
 
-projectSchema.statics.findInRange = function(filterStartDate, filterEndDate) {
+    contractId: {
+        type: Number,
+        ref: 'Contract',
+        required: true,
+    },
+
+    projectId: {
+        type: Number,
+        ref: 'Project',
+        required: true
+    }
+}, {_id:false} );
+
+allocationSchema.statics.findInRange = function(filterStartDate, filterEndDate) {
     //wenn nur fromDate gegeben ist, dann muss startDate>=filterStartDate || startDate<=filterStartDate<=endDate
     if (typeof filterStartDate !== 'undefined' && typeof filterEndDate === 'undefined') {
         return this.find({
@@ -82,10 +79,10 @@ projectSchema.statics.findInRange = function(filterStartDate, filterEndDate) {
     }
 }
 
-projectSchema.virtual('id').get(function () { return this._id; });
-projectSchema.virtual('id').set(function (i) { this._id = i; });
+allocationSchema.virtual('id').get(function () { return this._id; });
+allocationSchema.virtual('id').set(function (i) { this._id = i; });
 
-projectSchema.set('toJSON', {
+allocationSchema.set('toJSON', {
     virtuals: true,
     versionKey: false,
     transform: function (doc, ret) {
@@ -94,45 +91,7 @@ projectSchema.set('toJSON', {
 });
 
 autoIncrement.initialize(mongoose.connection);
-projectSchema.plugin(autoIncrement.plugin, "Project");
+allocationSchema.plugin(autoIncrement.plugin, "Allocation");
 
-export default mongoose.model('Project', projectSchema);
+export default mongoose.model('Allocation', allocationSchema);
 
-/**
- id	integer($int64)     -> todo: maybe changed to String -> Keep ObjectId
-     example: 42
-     readOnly: true
-     minimum: 1
-     maximum: 9223372036854776000
-     exclusiveMinimum: false
-     exclusiveMaximum: false
-     Project ID
- name*	string
-     example: IP5: Distributed IOT systems
-     minLength: 1
-     maxLength: 50
-     Project name
- ftePercentage*	integer($int64)
-     example: 1500
-     minimum: 0
-     maximum: 9223372036854776000
-     exclusiveMinimum: false
-     exclusiveMaximum: false
-
-     Full time equivalent represented as a percentage value (1 FTE = 100% = 1 person working 1 day)
- startDate*	string($date)
-     example: 2019-03-13
-
-     Project start date (YYYY-MM-DD)
- endDate*	string($date)
-     example: 2019-06-13
-
-     Project end date (YYYY-MM-DD)
- projectManagerId*	integer($int64)
-     example: 5
-     minimum: 1
-     maximum: 9223372036854776000
-     exclusiveMinimum: false
-     exclusiveMaximum: false
-     Project manager employee ID
- */
