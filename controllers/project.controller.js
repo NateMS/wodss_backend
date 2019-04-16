@@ -62,7 +62,11 @@ export async function getProjects(req, res) {
  * @returns void
  */
 export function addProject(req, res) {
-  //todo: 403 if user is not administrator
+  if(req.employee.role !== "ADMINISTRATOR") {
+    res.status(403).end();
+    return;
+  }
+
   if (!req.body.hasOwnProperty('name')
       || !req.body.hasOwnProperty('ftePercentage')
       || !req.body.hasOwnProperty('startDate')
@@ -87,10 +91,27 @@ export function addProject(req, res) {
  * @param res
  * @returns void
 */
-export function getProject(req, res){
-  //todo: return 403 if user is not allowed to get the project
+export async function getProject(req, res){
+  if(req.employee.role === "DEVELOPER") { //filter for only projects, that the dev is working on
+    const contractIds =[];
+    const allocations = await Allocation.find({projectId: req.params.id });
+    for(let i = 0; i < allocations.length; i++) {
+      contractIds.push(allocations[i].contractId);
+    }
+    let isForbidden=false;
+    for(let i = 0; i < contractIds.length; i++) {
+      const contract = await Contract.findOne({_id: contractIds[i]});
+      if(contract.employeeId === req.employee._id) {
+        isForbidden = true;
+      }
+    }
+    if(!isForbidden) {
+      res.status(403).end();
+      return;
+    }
+  }
 
-  Project.findOne({ _id: {$eq:req.params.id} }).exec((err, project) => {
+  Project.findOne({ _id: req.params.id }).exec((err, project) => {
     if (err) {
       res.status(500).send(err);
     }else if(!project){
@@ -108,9 +129,12 @@ export function getProject(req, res){
  * @returns void
 */
 export function deleteProject(req, res) {
-  //todo: 403 if user is not allowed to delete this project
+  if(req.employee.role !== "ADMINISTRATOR") {
+    res.status(403).end();
+    return;
+  }
 
-  Project.findOne({ _id: {$eq: req.params.id} }).exec((err, project) => {
+  Project.findOne({ _id: req.params.id }).exec((err, project) => {
     if (err) {
       res.status(500).send(err);
     }else if(!project){
@@ -129,8 +153,18 @@ export function deleteProject(req, res) {
  * @param res
  */
 //todo: Code project
-export function updateProject(req, res){
-  //todo: 403 if user is not allowed to update this project
+export async function updateProject(req, res) {
+  if(req.employee.role === "DEVELOPER") {
+    res.status(403).end();
+    return;
+  }
+  if(req.employee.role === "PROJECTMANAGER") {
+    const project = await Project.findOne({ _id: req.params.id });
+    if(project.projectManagerId === req.employee.role) {
+      res.status(403).end();
+      return;
+    }
+  }
 
   if(!req.body.hasOwnProperty('name')
       || !req.body.hasOwnProperty('ftePercentage')
@@ -141,17 +175,18 @@ export function updateProject(req, res){
     return;
   }
 
-  Project.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
+  Project.findOne({ _id: {$eq: req.params.id} }).exec((err, project) => {
     if(err){
       res.status(500).send(err);
-    }else if(!employee){
+    }else if(!project){
       res.status(404).end();
     }else{
-      employee.active = req.body.active;
-      employee.firstName = req.body.firstName;
-      employee.lastName = req.body.lastName;
-      employee.emailAddress = req.body.emailAddress;
-      employee.save((err, saved) => {
+      project.name = req.body.name;
+      project.ftePercentage = req.body.ftePercentage;
+      project.startDate = req.body.startDate;
+      project.endDate = req.body.endDate;
+      project.projectManagerId = req.body.projectManagerId;
+      project.save((err, saved) => {
         if(err){
           res.status(500).send(err);
         }else{
