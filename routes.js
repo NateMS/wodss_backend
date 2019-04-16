@@ -29,10 +29,11 @@ module.exports = function (app) {
   /**
    * Project-Endpoint
    */
-  app.get('/api/project', ProjectController.getProjects);
-  app.get('/api/project/:id', ProjectController.getProject);
-  app.post('/api/project', ProjectController.addProject);
-  app.delete('/api/project/:id', ProjectController.deleteProject);
+  app.get('/api/project', requireAuth, mapEmployees.map, ProjectController.getProjects);
+  app.get('/api/project/:id', requireAuth, mapEmployees.map, ProjectController.getProject);
+  app.post('/api/project', requireAuth, mapEmployees.map, ProjectController.addProject);
+  app.delete('/api/project/:id', requireAuth, mapEmployees.map, ProjectController.deleteProject);
+  app.put('/api/project/:id', requireAuth, mapEmployees.map, ProjectController.updateProject);
 
   /**
    * Contract-Endpoint

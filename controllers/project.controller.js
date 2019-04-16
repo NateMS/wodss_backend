@@ -11,6 +11,22 @@ import Allocation from '../models/allocation';
  */
 export async function getProjects(req, res) {
   const query = {};
+
+  const projectIds = [];
+  const contractIds = [];
+  if(req.employee.role === "DEVELOPER") { //filter for only projects, that the dev is working on
+    const contracts = await Contract.find({employeeId: req.employee._id});
+    for(let i = 0; i < contracts.length; i++) {
+      contractIds.push(contracts[i]._id);
+    }
+    const allocations = await Allocation.find({contractId: { "$in" : contractIds}});
+    for(let i = 0; i < allocations.length; i++) {
+      projectIds.push(allocations[i].projectId);
+    }
+
+    query["_id"] = { "$in": projectIds};
+  }
+
   if(req.query.hasOwnProperty('projectManagerId')) {
     const projectManagerId = req.query.projectManagerId;
     query["projectManagerId"] = {$eq: projectManagerId};
@@ -20,19 +36,6 @@ export async function getProjects(req, res) {
     if(emp === null) {
       res.status(404).end();
       return;
-    }
-
-    const role = req.employee.role;
-    let contractIds = [];
-    let projectIds  = [];
-    const
-    if(role === "DEVELOPER") {
-      await Contract.find({employeeId: req.employee.id}).forEach((err, contract) => {
-        contractIds.push(contract.id);
-      })
-      await Allocation.find({contractId: { "$in" : contractIds}}).forEach((err, allocation) => {
-        projectIds.push(allocation.projectId);
-      })
     }
   }
 
@@ -49,6 +52,7 @@ export async function getProjects(req, res) {
     }
     res.json(projects);
   })
+
 }
 
 /**
