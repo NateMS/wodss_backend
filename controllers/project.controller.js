@@ -1,5 +1,7 @@
 import Project from '../models/project';
 import Employee from '../models/employee';
+import Contract from '../models/contract';
+import Allocation from '../models/allocation';
 
 /**
  * Get all posts
@@ -18,6 +20,19 @@ export async function getProjects(req, res) {
     if(emp === null) {
       res.status(404).end();
       return;
+    }
+
+    const role = req.employee.role;
+    let contractIds = [];
+    let projectIds  = [];
+    const
+    if(role === "DEVELOPER") {
+      await Contract.find({employeeId: req.employee.id}).forEach((err, contract) => {
+        contractIds.push(contract.id);
+      })
+      await Allocation.find({contractId: { "$in" : contractIds}}).forEach((err, allocation) => {
+        projectIds.push(allocation.projectId);
+      })
     }
   }
 

@@ -95,7 +95,7 @@ export function getEmployee(req, res) {
  * @returns void
 */
 export function deleteEmployee(req, res) {
-  if(req.employee.role === "DEVELOPER") {
+  if(req.employee.role === "ADMINISTRATOR") {
     res.status(403).end();
     return;
   }
@@ -119,7 +119,7 @@ export function deleteEmployee(req, res) {
  * @param res
  */
 export function updateEmployee(req, res){
-  if(req.employee.role === "DEVELOPER") {
+  if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).end();
     return;
   }
