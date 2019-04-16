@@ -10,6 +10,7 @@ const passport = require('passport');
 
 const mapEmployees = require('./services/employee.mapper');
 
+<<<<<<< HEAD
 const requireAuth = passport.authenticate('jwt', {session: false}, null);
 
 module.exports = function (app) {
@@ -55,4 +56,3 @@ module.exports = function (app) {
   //PUT on /token requires Auth, because it's only accessible if a token exists that can be renewed
   app.put('/token', requireAuth, TokenController.refreshToken);
 };
-

@@ -1,7 +1,7 @@
 FROM node:10 as base
 RUN mkdir -p /app
 WORKDIR /app
-EXPOSE 3000
+EXPOSE 3090
 
 ENV NODE_ENV development
 COPY package.json package-lock.json ./
