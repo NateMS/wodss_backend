@@ -27,6 +27,11 @@ export function createToken(req, res) {
             Employee.findOne({emailAddress: {$eq: req.body.emailAddress}}, function (err, e) {
                 if(err){ return res.status(500).send(err) }
 
+                //Deny access to employees with active=false
+                if(e.active === false) {
+                    return res.status(403).send({ error: "Inactive account. Ask an administrator to activate your account!"});
+                }
+
                 const token = jwt.encode({
                     sub: user._id,
                     iss: "FHNW Wodss 2019",
@@ -46,6 +51,11 @@ export function refreshToken(req, res){
         if(err){
             return res.status(500).send(err);
         }
+        //Deny access to employees with active=false
+        if(e.active === false) {
+            return res.status(403).send({ error: "Inactive account. Ask an administrator to activate your account!"});
+        }
+
         const timestamp = new Date().getTime();
         const tokenTtl = (Number(process.env.JWT_TTL) || 86400)*1000;
         const timestampExpiration = timestamp + tokenTtl;

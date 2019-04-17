@@ -1,4 +1,6 @@
 import Contract from '../models/contract';
+import Employee from '../models/employee';
+import Allocation from "../models/allocation";
 
 /**
  * Get all contracts
@@ -33,7 +35,12 @@ export function getContracts(req, res) {
  * @param res
  * @returns void
  */
-export function addContract(req, res) {
+export async function addContract(req, res) {
+    if(req.employee.role !== "ADMINISTRATOR") {
+        res.status(403).end();
+        return;
+    }
+
     if (!req.body.hasOwnProperty('startDate')
         || !req.body.hasOwnProperty('endDate')
         || !req.body.hasOwnProperty('pensumPercentage')
@@ -42,6 +49,14 @@ export function addContract(req, res) {
         res.status(412).end();
         return;
     }
+
+    await Employee.findOne({ _id: req.body.employeeId }).exec((err, e) => {
+        if (err) {
+            res.status(500).send(err);
+        } else if(!e) {
+            res.status(404).end();
+        }
+    });
 
     const newContract = new Contract(req.body);
     newContract.save((err, saved) => {
@@ -60,14 +75,18 @@ export function addContract(req, res) {
  * @returns void
  */
 export function getContract(req, res) {
-    //todo: return 403 if missing permission due to role
-
     Contract.findOne({ _id: {$eq: req.params.id} }).exec((err, contract) => {
         if (err) {
             res.status(500).send(err);
         }else if(!contract){
             res.status(404).end();
         }else{
+            if(req.employee.role === "DEVELOPER") { //Check whether dev is allowed to see
+                if(contract.employeeId !== req.employee._id) {
+                    res.status(403).end();
+                    return;
+                }
+            }
             res.json(contract);
         }
     });
@@ -79,8 +98,18 @@ export function getContract(req, res) {
  * @param res
  * @returns void
  */
-export function deleteContract(req, res) {
-    //todo: return 403 if missing permission due to role
+export async function deleteContract(req, res) {
+    if(req.employee.role !== "ADMINISTRATOR") {
+        res.status(403).end();
+        return;
+    }
+
+    await Allocation.find({ contractId: {$eq: req.params.id }}).exec((err, allocs) => { //Check precondition that contract only deleted when no allocations associated
+        if(allocs !== null && allocs.length > 0) {
+            res.status(412).end();
+            return;
+        }
+    })
 
     Contract.findOne({ _id: {$eq: req.params.id} }).exec((err, contract) => {
         if (err) {
@@ -101,7 +130,7 @@ export function deleteContract(req, res) {
  * @param req
  * @param res
  */
-export function updateContract(req, res){
+export async function updateContract(req, res){
     //Test whether current user is authorized
     if(req.employee.role !== "ADMINISTRATOR") {
         res.status(403).end();
@@ -114,6 +143,16 @@ export function updateContract(req, res){
         res.status(412).send(req.body);
         return;
     }
+
+    //Does the referenced employee exist?
+    await Employee.findOne({ _id: {$eq: req.body.employeeId}}).exec((err, e) => {
+        if(err){
+            res.status(500).send(err);
+        }else if(!e){
+            res.status(404).end();
+        }
+        return;
+    });
 
     Contract.findOne({ _id: {$eq: req.params.id} }).exec((err, contract) => {
         if(err){
