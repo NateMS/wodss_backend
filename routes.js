@@ -38,11 +38,11 @@ module.exports = function (app) {
   /**
    * Contract-Endpoint
    */
-  app.get('/api/contract', ContractController.getContracts);
-  app.get('/api/contract/:id', ContractController.getContract);
-  app.post('/api/contract', ContractController.addContract);
-  app.delete('/api/contract/:id', ContractController.deleteContract);
-  app.put('/api/contract/:id', ContractController.updateContract);
+  app.get('/api/contract', requireAuth, mapEmployees.map, ContractController.getContracts);
+  app.get('/api/contract/:id', requireAuth, mapEmployees.map, ContractController.getContract);
+  app.post('/api/contract', requireAuth, mapEmployees.map, ContractController.addContract);
+  app.delete('/api/contract/:id', requireAuth, mapEmployees.map, ContractController.deleteContract);
+  app.put('/api/contract/:id', requireAuth, mapEmployees.map, ContractController.updateContract);
   /**
    * Allocation-Endpoint
    */

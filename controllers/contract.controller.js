@@ -7,6 +7,11 @@ import Contract from '../models/contract';
  * @returns void
  */
 export function getContracts(req, res) {
+    const query = {};
+    if(req.employee.role === "DEVELOPER") { //filter for only projects, that the dev is working on
+        query["employeeId"] = {$eq: req.employee._id};
+    }
+
     const fromDate = req.query.fromDate;
     const toDate = req.query.toDate;
     if(new Date(fromDate) > new Date(toDate)) {
@@ -14,7 +19,7 @@ export function getContracts(req, res) {
         return;
     }
 
-    Contract.findInRange(fromDate, toDate).sort('-dateAdded').exec((err, contracts) => {
+    Contract.findInRange(fromDate, toDate).find(query).sort('-dateAdded').exec((err, contracts) => {
         if (err) {
             res.status(500).send(err);
         }
