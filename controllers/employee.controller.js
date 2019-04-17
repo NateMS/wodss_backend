@@ -87,12 +87,12 @@ export function getEmployee(req, res) {
 }
 
 /**
- * Delete a employee
+ * Anonymize a employee
  * @param req
  * @param res
  * @returns void
 */
-export function deleteEmployee(req, res) {
+export function anonymizeEmployee(req, res) {
   if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).end();
     return;

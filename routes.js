@@ -23,7 +23,7 @@ module.exports = function (app) {
   app.get('/api/employee',requireAuth, mapEmployees.map, EmployeeController.getEmployees);
   app.get('/api/employee/:id',requireAuth, mapEmployees.map, EmployeeController.getEmployee);
   app.post('/api/employee', requireAuth, mapEmployees.map, EmployeeController.addEmployee);
-  app.delete('/api/employee/:id', requireAuth, mapEmployees.map, EmployeeController.deleteEmployee);
+  app.delete('/api/employee/:id', requireAuth, mapEmployees.map, EmployeeController.anonymizeEmployee);
   app.put('/api/employee/:id', requireAuth, mapEmployees.map, EmployeeController.updateEmployee);
 
   /**

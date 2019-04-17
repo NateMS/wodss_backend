@@ -4,7 +4,7 @@ import Contract from '../models/contract';
 import Allocation from '../models/allocation';
 
 /**
- * Get all posts
+ * Get all projects
  * @param req
  * @param res
  * @returns void
@@ -56,7 +56,7 @@ export async function getProjects(req, res) {
 }
 
 /**
- * Save a post
+ * Save a project
  * @param req
  * @param res
  * @returns void
@@ -92,20 +92,20 @@ export function addProject(req, res) {
  * @returns void
 */
 export async function getProject(req, res){
-  if(req.employee.role === "DEVELOPER") { //filter for only projects, that the dev is working on
+  if(req.employee.role === "DEVELOPER") { //check whether dev is allowed to see the project
     const contractIds =[];
     const allocations = await Allocation.find({projectId: req.params.id });
     for(let i = 0; i < allocations.length; i++) {
       contractIds.push(allocations[i].contractId);
     }
-    let isForbidden=false;
+    let isAllowed=false;
     for(let i = 0; i < contractIds.length; i++) {
       const contract = await Contract.findOne({_id: contractIds[i]});
       if(contract.employeeId === req.employee._id) {
-        isForbidden = true;
+        isAllowed = true;
       }
     }
-    if(!isForbidden) {
+    if(!isAllowed) {
       res.status(403).end();
       return;
     }
@@ -123,12 +123,12 @@ export async function getProject(req, res){
 }
 
 /**
- * Delete a post
+ * Delete a project and all associated allocations
  * @param req
  * @param res
  * @returns void
 */
-export function deleteProject(req, res) {
+export async function deleteProject(req, res) {
   if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).end();
     return;
@@ -140,8 +140,13 @@ export function deleteProject(req, res) {
     }else if(!project){
       res.status(404).end();
     }else{
-      project.remove(() => {
-        res.status(204).end();
+      project.remove(async () => { //after removing the project, remove all associated allocations
+        await Allocation.find({ projectId: req.params.id }).exec((err, allocation) => {
+          if(!err) {
+            allocation.remove(() => {})
+          }
+        })
+        res.status(204).end(); //successfully deleted
       });
     }
   });
@@ -152,13 +157,12 @@ export function deleteProject(req, res) {
  * @param req
  * @param res
  */
-//todo: Code project
 export async function updateProject(req, res) {
-  if(req.employee.role === "DEVELOPER") {
+  if(req.employee.role === "DEVELOPER") { //dev is not allowed
     res.status(403).end();
     return;
   }
-  if(req.employee.role === "PROJECTMANAGER") {
+  if(req.employee.role === "PROJECTMANAGER") { //projectmanager of his own projects is allowed
     const project = await Project.findOne({ _id: req.params.id });
     if(project.projectManagerId === req.employee.role) {
       res.status(403).end();
@@ -166,6 +170,7 @@ export async function updateProject(req, res) {
     }
   }
 
+  //Precondition Check
   if(!req.body.hasOwnProperty('name')
       || !req.body.hasOwnProperty('ftePercentage')
       || !req.body.hasOwnProperty('startDate')
@@ -173,6 +178,20 @@ export async function updateProject(req, res) {
       || !req.body.hasOwnProperty('projectManagerId')){
     res.status(412).end();
     return;
+  }
+
+  //Date adjustment check (endDate in past or exact present is not allowed)
+  if(req.body.endDate < new Date().getTime()) {
+    res.status(412).end();
+    return;
+  } else { //check and adjust all influenced allocations
+    await Allocation.find({ projectId: req.params.id }).exec(async (err, allocation) => {
+      if(allocation.startDate > req.body.endDate) { //delete all future allocations which are beyond the project runtime
+        allocation.remove();
+      } else { //adjust endDate of all allocations to actual projectend's date
+        allocation.endDate = req.body.endDate
+        await allocation.save();
+      }
   }
 
   Project.findOne({ _id: {$eq: req.params.id} }).exec((err, project) => {
