@@ -8,7 +8,7 @@ const Employee = require('../models/employee');
 export function map(req, res, next) {
     if(req.user === undefined || req.user.length < 1){ return next({message: "No credentials set by JWT"}, null) }
 
-    Employee.default.findOne({emailAddress: {$eq: req.user[0].emailAddress}}, function (err, employee){
+    Employee.default.findOne({emailAddress: {$eq: req.user.emailAddress}}, function (err, employee){
         if(err){ return next(err, null) }
 
         if(employee){

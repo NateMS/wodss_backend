@@ -15,11 +15,7 @@ const jwtLogin = new JwtStrategy(jwtOptions, function (payload, done) {
         return done(null, false);
     }
 
-    Credentials.default.find({_id: {$eq: payload.sub}}, function (err, user) {
-        if(user.length === 0) { //falls Token invalidiert
-            return done(null, false);
-        }
-
+    Credentials.default.findOne({_id: {$eq: payload.sub}}, function (err, user) {
         if (err) {
             return done(err, false);
         }

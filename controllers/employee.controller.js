@@ -37,7 +37,8 @@ export function addEmployee(req, res) {
   }
 
   const newEmployee = new Employee(req.body);
-  newEmployee.role = req.query.role;
+  newEmployee.active = false; //needs to be set active manually by an admin!
+  newEmployee.role   = req.query.role;
 
   const salt = bcrypt.genSaltSync(saltRounds);
   const hashedPassword = bcrypt.hashSync(req.query.password, salt);
@@ -97,15 +98,26 @@ export function deleteEmployee(req, res) {
     return;
   }
 
+  //anonymize (hash-value of emailaddress (unique constraint))
   Employee.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
-    if (err) {
+    if(err){
       res.status(500).send(err);
     }else if(!employee){
       res.status(404).end();
-    }else {
-      employee.remove(() => {
-        res.status(204).end();
-      });
+    }else{
+      employee.active = false;
+      employee.firstName = "ANONYMIZED";
+      employee.lastName = "ANONYMIZED";
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const hashedEmail = bcrypt.hashSync(employee.emailAddress, salt);
+      employee.emailAddress = hashedEmail + "@invalid";
+      employee.save((err, saved) => {
+        if(err){
+          res.status(500).send(err);
+        }else{
+          res.status(204).end();
+        }
+      })
     }
   });
 }
