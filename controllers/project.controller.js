@@ -186,12 +186,13 @@ export async function updateProject(req, res) {
     return;
   } else { //check and adjust all influenced allocations
     await Allocation.find({ projectId: req.params.id }).exec(async (err, allocation) => {
-      if(allocation.startDate > req.body.endDate) { //delete all future allocations which are beyond the project runtime
+      if (allocation.startDate > req.body.endDate) { //delete all future allocations which are beyond the project runtime
         allocation.remove();
       } else { //adjust endDate of all allocations to actual projectend's date
         allocation.endDate = req.body.endDate
         await allocation.save();
       }
+    });
   }
 
   Project.findOne({ _id: {$eq: req.params.id} }).exec((err, project) => {

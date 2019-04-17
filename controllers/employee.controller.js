@@ -9,6 +9,7 @@ const saltRounds = process.env.SALT_ROUNDS || 10;
  * @param res
  * @returns void
  */
+//todo einpflegen der active-logik (was darf ein employee wenn er nicht active=true ist => guest)
 export function getEmployees(req, res) {
   Employee.find().exec((err, employees) => {
     if (err) {
