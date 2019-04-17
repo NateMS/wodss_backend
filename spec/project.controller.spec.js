@@ -15,31 +15,31 @@ let token;
 
 const testData = {
     "employees": [
-    {
-        "firstName": "Admin",
-        "lastName": "VomBeruf",
-        "active": true,
-        "emailAddress": "admin.vomberuf@students.fhnw.ch",
-        "role": "ADMINISTRATOR",
-        "password": "AMKJUNGE110"
-    },
-    {
-        "firstName": "Wallah",
-        "lastName": "Habibi",
-        "active": true,
-        "emailAddress": "wallah.habibi@students.fhnw.ch",
-        "role": "PROJECTMANAGER",
-        "password": "AMKJUNGE110"
-    },
-    {
-        "firstName": "John",
-        "lastName": "Doe",
-        "active": true,
-        "emailAddress": "john.doe@students.fhnw.ch",
-        "role": "DEVELOPER",
-        "password": "AMKJUNGE110"
-    }
-]
+        {
+            "firstName": "Admin",
+            "lastName": "VomBeruf",
+            "active": true,
+            "emailAddress": "admin.vomberuf@students.fhnw.ch",
+            "role": "ADMINISTRATOR",
+            "password": "AMKJUNGE110"
+        },
+        {
+            "firstName": "Wallah",
+            "lastName": "Habibi",
+            "active": true,
+            "emailAddress": "wallah.habibi@students.fhnw.ch",
+            "role": "PROJECTMANAGER",
+            "password": "AMKJUNGE110"
+        },
+        {
+            "firstName": "John",
+            "lastName": "Doe",
+            "active": true,
+            "emailAddress": "john.doe@students.fhnw.ch",
+            "role": "DEVELOPER",
+            "password": "AMKJUNGE110"
+        }
+    ]
 }
 
 let credentialIds = [];

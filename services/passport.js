@@ -9,7 +9,6 @@ const jwtOptions = {
 };
 
 const jwtLogin = new JwtStrategy(jwtOptions, function (payload, done) {
-
     // If the token is expired, return 401 Unauthorized with no further information.
     const currentTime = new Date().getTime();
     if (payload.exp < currentTime) {
@@ -17,13 +16,17 @@ const jwtLogin = new JwtStrategy(jwtOptions, function (payload, done) {
     }
 
     Credentials.default.find({_id: {$eq: payload.sub}}, function (err, user) {
+        if(user.length === 0) { //falls Token invalidiert
+            return done(null, false);
+        }
+
         if (err) {
-            return done(err, false)
+            return done(err, false);
         }
         if (user) {
-            done(null, user);
+            return done(null, user);
         } else {
-            done(null, false)
+            return done(null, false);
         }
     })
 });

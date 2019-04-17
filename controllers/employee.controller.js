@@ -52,9 +52,7 @@ export function addEmployee(req, res) {
     } else {
       //Password will be hashed by the pre-save hook
       const newCredentials = new Credentials({password: hashedPassword, emailAddress:req.body.emailAddress});
-      console.warn("New credentials created. Saving...");
       newCredentials.save((err, savedCred) => {
-        console.warn("new credentials created.");
         if(err){
           if(err.message.indexOf('duplicate key error') > 0){
             res.sendStatus(412);
@@ -62,7 +60,6 @@ export function addEmployee(req, res) {
             res.status(500).send(err);
           }
         }else{
-          console.warn("Success. Returning...");
           res.json(saved);
         }
       });

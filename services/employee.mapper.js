@@ -15,7 +15,9 @@ export function map(req, res, next) {
             req.employee = employee;
             next(null, employee);
         }else{
-            next(null, false);
+            res.status(401);
+            res.send("Your token has been invalidated.");
+            return;
         }
     });
 }
