@@ -1,4 +1,7 @@
 import Allocation from '../models/allocation';
+import Employee from '../models/employee';
+import Project from '../models/project';
+import Contract from "../models/contract";
 
 /**
  * Get all allocations
@@ -6,30 +9,62 @@ import Allocation from '../models/allocation';
  * @param res
  * @returns void
  */
-export function getAllocations(req, res) {
-    // todo: if unauthenticated, return 401
-    // todo: if token invalid, return 401
-
+export async function getAllocations(req, res) {
     const query = {};
-    if(req.query.hasOwnProperty('employeeId')) {
-        query["employeeId"] = {$eq: req.query.employeeId};
-    }
     if(req.query.hasOwnProperty('projectId')){
         query["projectId"] = {$eq: req.query.projectId};
     }
 
-    const fromDate   = req.query.fromDate;
-    const toDate     = req.query.toDate;
+    //Check whether the project or employee actually exists
+    await Employee.findOne({ _id: req.query.employeeId }).exec((err, e) => {
+        if(err) {
+            res.status(500).send(err);
+        } else if(!e) {
+            res.status(404).end();
+        }
+        return;
+    });
+    await Project.findOne({ _id: req.query.projectId }).exec((err, p) => {
+        if(err) {
+            res.status(500).send(err);
+        } else if(!p) {
+            res.status(404).end();
+        }
+        return;
+    });
+
+    const fromDate = req.query.fromDate;
+    const toDate   = req.query.toDate;
     if(new Date(fromDate) > new Date(toDate)) {
         res.status(412).end();  //Precondition Failed, because it's something the user should fix.
         return;
     }
 
-    Allocation.findInRange(fromDate, toDate).find(query).sort('-dateAdded').exec((err, contracts) => {
+    Allocation.findInRange(fromDate, toDate).find(query).sort('-dateAdded').exec(async (err, allocations) => {
+        if(req.query.hasOwnProperty('employeeId')) { //remove all allocations from employees other than employee X
+            let contractIds = [];
+            let ids = allocations.map(a => a.contractId);
+            for(let i = 0; i < ids.length; i++) {
+                await Contract.find({employeeId: req.query.employeeId }).exec((err, c) => {
+                    contractIds.push(c._id);
+                })
+            }
+            allocations.filter(a => contractIds.includes(a.contractId));
+        }
+
+        if(req.employee.role === "DEVELOPER") {
+            let contractIds = [];
+            for(let i = 0; i < contractIds.length; i++) {
+                await Contract.find({employeeId: req.query.employeeId }).exec((err, c) => {
+                    contractIds.push(c._id);
+                })
+            }
+            allocations.filter(a => contractIds.includes(a.contractId));
+        }
         if (err) {
             res.status(500).send(err);
         }
-        res.json(contracts);
+        res.json(allocations);
     });
 }
 
