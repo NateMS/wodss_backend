@@ -78,7 +78,12 @@ export async function getAllocations(req, res) {
  * @param res
  * @returns void
  */
-export function addAllocation(req, res) {
+export async function addAllocation(req, res) {
+    if(req.employee.role === "DEVELOPER") {
+        res.status(403).end();
+        return;
+    }
+
     if (!req.body.hasOwnProperty('startDate')
         || !req.body.hasOwnProperty('endDate')
         || !req.body.hasOwnProperty('pensumPercentage')
@@ -86,6 +91,27 @@ export function addAllocation(req, res) {
         || !req.body.hasOwnProperty('projectId')) {
 
         res.status(412).end();
+        return;
+    }
+
+    //Check whether the project actually exists
+    const project = await Project.findOne({_id: req.body.projectId});
+    if(!project) {
+        res.status(404).end();
+        return;
+    } else { //only loading the project once
+        if(req.employee.role === "PROJECTMANAGER") {
+            if(project.projectManagerId !== req.employee._id) {
+                res.status(403).end();
+                return;
+            }
+        }
+    }
+
+    //Check whether the contract actually exists
+    const contract = await Contract.findOne({_id: req.body.contractId});
+    if(!contract) {
+        res.status(404).end();
         return;
     }
 
@@ -106,13 +132,23 @@ export function addAllocation(req, res) {
  * @returns void
  */
 export function getAllocation(req, res) {
-    //todo: return 401 if unauthenticated or invalid token
-    //todo: return 403 if missing permission due to role
+    Allocation.findOne({ _id: {$eq: req.params.id} }).exec(async (err, allocation) => {
+        let isAllowed=false;
+        if(req.employee.role === "DEVELOPER") {
+            let contracts = await Contract.find({employeeId: req.employee._id}).exec();
+            for(const i in contracts) {
+                if(allocation.contractId == contracts[i]) {
+                    isAllowed=true;
+                    break;
+                }
+            }
+        }
 
-    Allocation.findOne({ _id: {$eq: req.params.id} }).exec((err, allocation) => {
         if (err) {
             res.status(500).send(err);
-        }else if(!allocation){
+        }else if(!isAllowed) {
+            res.status(403).end();
+        } else if(!allocation){
             res.status(404).end();
         }else{
             res.json(allocation);
@@ -127,13 +163,28 @@ export function getAllocation(req, res) {
  * @returns void
  */
 export function deleteAllocation(req, res) {
-    //todo: return 401 if unauthenticated or invalid token
-    //todo: return 403 if missing permission due to role
+    if(req.employee.role === "DEVELOPER") {
+        res.status(403).end();
+        return;
+    }
 
-    Allocation.findOne({ _id: {$eq: req.params.id} }).exec((err, allocation) => {
+    Allocation.findOne({ _id: {$eq: req.params.id} }).exec(async (err, allocation) => {
+        let isAllowed=false;
+        if(req.employee.role === "DEVELOPER") {
+            let contracts = await Contract.find({employeeId: req.employee._id}).exec();
+            for (const i in contracts) {
+                if (allocation.contractId == contracts[i]) {
+                    isAllowed = true;
+                    break;
+                }
+            }
+        }
+
         if (err) {
             res.status(500).send(err);
-        }else if(!allocation){
+        }else if(!isAllowed) {
+            res.status(403).end();
+        } else if(!allocation){
             res.status(404).end();
         }else {
             allocation.remove(() => {
@@ -150,8 +201,10 @@ export function deleteAllocation(req, res) {
  * @param res
  */
 export function updateAllocation(req, res){
-    //todo: 401 if unauthenticated or invalid token
-    //todo: 403 if user is not allowed to update this contract
+    if(req.employee.role === "DEVELOPER") {
+        res.status(403).end();
+        return;
+    }
 
     if (!req.body.hasOwnProperty('startDate')
         || !req.body.hasOwnProperty('endDate')
@@ -163,10 +216,23 @@ export function updateAllocation(req, res){
         return;
     }
 
-    Allocation.findOne({ _id: {$eq: req.params.id} }).exec((err, allocation) => {
+    Allocation.findOne({ _id: {$eq: req.params.id} }).exec(async (err, allocation) => {
+        let isAllowed=false;
+        if(req.employee.role === "DEVELOPER") {
+            let contracts = await Contract.find({employeeId: req.employee._id}).exec();
+            for (const i in contracts) {
+                if (allocation.contractId == contracts[i]) {
+                    isAllowed = true;
+                    break;
+                }
+            }
+        }
+
         if(err){
             res.status(500).send(err);
-        }else if(!allocation){
+        }else if(!isAllowed) {
+            res.status(403).end();
+        } else if(!allocation){
             res.status(404).end();
         }else{
             allocation.startDate = req.body.startDate;

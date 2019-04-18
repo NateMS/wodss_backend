@@ -164,7 +164,7 @@ export async function updateProject(req, res) {
   }
   if(req.employee.role === "PROJECTMANAGER") { //projectmanager of his own projects is allowed
     const project = await Project.findOne({ _id: req.params.id });
-    if(project.projectManagerId === req.employee.role) {
+    if(project.projectManagerId !== req.employee._id) {
       res.status(403).end();
       return;
     }
