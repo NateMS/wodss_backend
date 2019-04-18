@@ -6,7 +6,7 @@ services:
         container_name: wodss_backend
         restart: always
         ports:
-          - "3000:3000"
+          - "3090:3090"
         depends_on:
           - mongodb
     mongodb:
