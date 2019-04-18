@@ -15,54 +15,58 @@ export async function getAllocations(req, res) {
         query["projectId"] = {$eq: req.query.projectId};
     }
 
-    //Check whether the project or employee actually exists
-    await Employee.findOne({ _id: req.query.employeeId }).exec((err, e) => {
-        if(err) {
-            res.status(500).send(err);
-        } else if(!e) {
+    //Check whether the employee actually exists
+    if(req.employee.role !== "DEVELOPER" && req.query.hasOwnProperty('employeeId')) {
+        const employee = await Employee.findOne({_id: req.query.employeeId});
+        if(!employee) {
             res.status(404).end();
+            return;
         }
-        return;
-    });
-    await Project.findOne({ _id: req.query.projectId }).exec((err, p) => {
-        if(err) {
-            res.status(500).send(err);
-        } else if(!p) {
+    }
+
+    //Check whether the project actually exists
+    if(req.query.hasOwnProperty('projectId')) {
+        const project = await Project.findOne({_id: req.query.projectId});
+        if(!project) {
             res.status(404).end();
+            return;
         }
-        return;
-    });
+    }
 
     const fromDate = req.query.fromDate;
     const toDate   = req.query.toDate;
     if(new Date(fromDate) > new Date(toDate)) {
-        res.status(412).end();  //Precondition Failed, because it's something the user should fix.
+        res.status(412).end();  //Precondition failed
         return;
     }
 
     Allocation.findInRange(fromDate, toDate).find(query).sort('-dateAdded').exec(async (err, allocations) => {
-        if(req.query.hasOwnProperty('employeeId')) { //remove all allocations from employees other than employee X
-            let contractIds = [];
-            let ids = allocations.map(a => a.contractId);
-            for(let i = 0; i < ids.length; i++) {
-                await Contract.find({employeeId: req.query.employeeId }).exec((err, c) => {
-                    contractIds.push(c._id);
-                })
-            }
-            allocations.filter(a => contractIds.includes(a.contractId));
-        }
+        if (err) res.status(500).send(err).end();
 
+        let contractIds = [];
         if(req.employee.role === "DEVELOPER") {
-            let contractIds = [];
-            for(let i = 0; i < contractIds.length; i++) {
-                await Contract.find({employeeId: req.query.employeeId }).exec((err, c) => {
-                    contractIds.push(c._id);
-                })
+            let contracts = await Contract.find({employeeId: req.employee._id}).exec();
+            for(const i in contracts) {
+                contractIds.push(contracts[i]._id);
             }
-            allocations.filter(a => contractIds.includes(a.contractId));
-        }
-        if (err) {
-            res.status(500).send(err);
+
+            allocations = allocations.filter(function(allocation) {
+                return contractIds.includes(allocation.contractId);
+            });
+
+        } else if(req.query.hasOwnProperty('employeeId')) {
+            let contractIds = [];
+            let ids = allocations.map(a => a.contractId); //alle contractIds der bisherigen allocations
+            for(let i = 0; i < ids.length; i++) {
+                let contract = await Contract.findOne({_id: ids[i]}).exec();
+                if(contract.employeeId == req.query.employeeId) {
+                    contractIds.push(contract._id);
+                }
+            }
+
+            allocations = allocations.filter(function(allocation) {
+                return contractIds.includes(allocation.contractId);
+            });
         }
         res.json(allocations);
     });
