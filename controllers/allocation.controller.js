@@ -56,7 +56,7 @@ export async function getAllocations(req, res) {
 
         } else if(req.query.hasOwnProperty('employeeId')) {
             let contractIds = [];
-            let ids = allocations.map(a => a.contractId); //alle contractIds der bisherigen allocations
+            let ids = [...new Set(allocations.map(a => a.contractId))]; //alle contractIds der bisherigen allocations
             for(let i = 0; i < ids.length; i++) {
                 let contract = await Contract.findOne({_id: ids[i]}).exec();
                 if(contract.employeeId == req.query.employeeId) {
