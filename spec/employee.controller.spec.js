@@ -133,8 +133,9 @@ describe('testing the employee endpoint', () => {
             });
     }, 5000);
 
-    let count=0;
+
     it('GET with role query param', function(done) {
+        let count=0;
 
         chai.request(app)
             .get("/api/employee?role=ADMINISTRATOR")
@@ -187,26 +188,35 @@ describe('testing the employee endpoint', () => {
     });
 
     it('DELETE one employee', function(done) {
+
         chai.request(app)
             .delete("/api/employee/" + idToDelete)
-            .set("Authorization", "Bearer " + adminToken)
+            .set("Authorization", "Bearer " + projectManagerToken)
             .end((err, res) => {
-                res.should.have.status(204);
+                res.should.have.status(403);
 
                 chai.request(app)
-                    .get("/api/employee/" + idToDelete)
+                    .delete("/api/employee/" + idToDelete)
                     .set("Authorization", "Bearer " + adminToken)
                     .end((err, res) => {
-                        res.should.have.status(200);
-                        res.body.firstName.should.eq("ANONYMIZED");
-                        res.body.lastName.should.eq("ANONYMIZED");
-                        res.body.active.should.eq(false);
-                        done();
+                        res.should.have.status(204);
+
+                        chai.request(app)
+                            .get("/api/employee/" + idToDelete)
+                            .set("Authorization", "Bearer " + adminToken)
+                            .end((err, res) => {
+                                res.should.have.status(200);
+                                res.body.firstName.should.eq("ANONYMIZED");
+                                res.body.lastName.should.eq("ANONYMIZED");
+                                res.body.active.should.eq(false);
+                                done();
+                            });
                     });
             });
     }, 5000);
 
     it('UPDATE an employee', function(done) {
+
         chai.request(app)
             .put("/api/employee/" + projectManagerId)
             .set("Authorization", "Bearer " + projectManagerToken)
@@ -239,6 +249,41 @@ describe('testing the employee endpoint', () => {
 
                                         done();
                                     });
+                            });
+                    });
+            });
+    }, 5000);
+
+    it('CREATE an employee', function(done) {
+
+        chai.request(app)
+            .post("/api/employee?role=DEVELOPER")
+            .set("Authorization", "Bearer " + adminToken)
+            .send({"active":true, "firstName":"Vorname1", "lastName":"Nachname1", "emailAddress":"vorname1.nachname1@students.fhnw.ch"})
+            .end((err, res) => {
+                res.should.have.status(412); //password flag query-param missing
+
+                chai.request(app)
+                    .post("/api/employee?role=DEVELOPER&password=123456789")
+                    .set("Authorization", "Bearer " + adminToken)
+                    .send({"active":true, "firstName":"Vorname1", "lastName":"Nachname1", "emailAddress":"vorname1.nachname1@students.fhnw.ch"})
+                    .end((err, res) => {
+                        res.should.have.status(201);
+                        res.body.firstName.should.eq("Vorname1");
+                        res.body.lastName.should.eq("Nachname1");
+                        res.body.active.should.eq(false);
+                        let id = res.body.id;
+
+                        chai.request(app)
+                            .get("/api/employee/" + id)
+                            .set("Authorization", "Bearer " + adminToken)
+                            .end(async (err, res) => {
+                                res.should.have.status(200); //has actually been created!
+
+                                await Employee.find({ _id:id}).deleteOne().exec();
+                                await Credentials.find({ emailAddress:"vorname1.nachname1@students.fhnw.ch"}).deleteOne().exec();
+
+                                done();
                             });
                     });
             });

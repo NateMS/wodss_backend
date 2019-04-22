@@ -49,11 +49,11 @@ module.exports = function (app) {
    */
   app.get('/api/allocation', requireAuth, mapEmployees.map, AllocationController.getAllocations);
   app.get('/api/allocation/:id', requireAuth, mapEmployees.map, AllocationController.getAllocation);
-  app.get('/api/allocation', requireAuth, mapEmployees.map, AllocationController.addAllocation);
-  app.delete('/api/allocation', requireAuth, mapEmployees.map, AllocationController.deleteAllocation);
-  app.put('api/allocation/:id', requireAuth, mapEmployees.map, AllocationController.updateAllocation);
+  app.post('/api/allocation', requireAuth, mapEmployees.map, AllocationController.addAllocation);
+  app.delete('/api/allocation/:id', requireAuth, mapEmployees.map, AllocationController.deleteAllocation);
+  app.put('/api/allocation/:id', requireAuth, mapEmployees.map, AllocationController.updateAllocation);
 
-      /**
+  /**
    * JWT-Token-Endpoint
    */
   app.post('/api/token', TokenController.createToken);

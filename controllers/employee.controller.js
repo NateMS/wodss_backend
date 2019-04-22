@@ -74,7 +74,7 @@ export function addEmployee(req, res) {
             res.status(500).send(err);
           }
         }else{
-          res.json(saved);
+          res.status(201).json(saved);
         }
       });
     }
