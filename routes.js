@@ -56,7 +56,7 @@ module.exports = function (app) {
       /**
    * JWT-Token-Endpoint
    */
-  app.post('/token', TokenController.createToken);
+  app.post('/api/token', TokenController.createToken);
   //PUT on /token requires Auth, because it's only accessible if a token exists that can be renewed
-  app.put('/token', requireAuth, TokenController.refreshToken);
+  app.put('/api/token', requireAuth, TokenController.refreshToken);
 };
