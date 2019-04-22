@@ -10,8 +10,6 @@ var app = require('../index');
 var should = chai.should();
 
 const saltRounds = 10;
-let id;
-let token;
 
 const testData = {
     "employees": [
@@ -44,9 +42,20 @@ const testData = {
 
 let credentialIds = [];
 let employeeIds   = [];
+let countEmployeesBefore = 0;
+
+let projectManagerToken;
+let adminToken;
+let idToDelete;
+let projectManagerId;
 
 describe('testing the employee endpoint', () => {
     beforeAll(async function() {
+        for (let i = 0; i < 10; i++) {
+            const numElems = await Employee.countDocuments().exec();
+            countEmployeesBefore = await numElems;
+        }
+
         for(let i = 0; i < testData.employees.length; i++) {
             const emp = Employee(testData.employees[i]);
             const salt = bcrypt.genSaltSync(saltRounds);
@@ -61,53 +70,177 @@ describe('testing the employee endpoint', () => {
 
     afterAll(async function() {
         for(let i = 0; i < credentialIds.length; i++) {
-            await Employee.find({ id:employeeIds[i]}).deleteOne().exec();
-            await Credentials.find({ id:credentialIds[i]}).deleteOne().exec();
+            await Employee.find({ _id:employeeIds[i]}).deleteOne().exec();
+            await Credentials.find({ _id:credentialIds[i]}).deleteOne().exec();
         }
     }, 50000);
 
-    it('Test token', function(done) {
+    it('Get admin & projectmanager token', function(done) {
+        let adminIndex = 0;
+        let projectManagerIndex = 0;
+        for(let i in testData.employees) {
+            if(testData.employees[i].role === "ADMINISTRATOR") {
+                adminIndex = i;
+            } else if(testData.employees[i].role === "PROJECTMANAGER") {
+                projectManagerIndex = i;
+            }
+        }
+
         chai.request(app)
-            .post("/token")
-            .send({"emailAddress": testData.employees[0].emailAddress, "rawPassword": testData.employees[0].password})
+            .post("/api/token")
+            .send({"emailAddress": testData.employees[adminIndex].emailAddress, "rawPassword": testData.employees[adminIndex].password})
             .end((err, res) => {
-                res.should.have.status(201);
-                token = res.body.token;
-                done();
+                adminToken = res.body.token;
+
+                chai.request(app)
+                    .post("/api/token")
+                    .send({"emailAddress": testData.employees[projectManagerIndex].emailAddress, "rawPassword": testData.employees[projectManagerIndex].password})
+                    .end((err, res) => {
+                        projectManagerToken = res.body.token;
+                        done();
+                    });
             });
     })
 
     it('GET all employees', function(done) {
+        let emps = 0;
         chai.request(app)
             .get("/api/employee")
-            .set("Authorization", "Bearer "+token)
+            .set("Authorization", "Bearer " + adminToken)
             .end((err, res) => {
                 res.should.have.status(200);
-                id = res.body[0].id;
-                res.body.length.should.eql(3);
-                done();
+                emps = res.body.length;
+                for(let i in res.body) {
+                    if(res.body[i].emailAddress === "john.doe@students.fhnw.ch") {
+                        idToDelete = res.body[i].id;
+                    } else if(res.body[i].emailAddress === "wallah.habibi@students.fhnw.ch") {
+                        projectManagerId = res.body[i].id;
+                    }
+                }
+                res.body.length.should.eql(countEmployeesBefore + 3);
+
+                chai.request(app)
+                    .get("/api/employee")
+                    .set("Authorization", "Bearer " + projectManagerToken)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.length.should.eq(emps); //projectmanager needs to see same amount of employees
+                        emps = res.body.length;
+
+                        done();
+                    });
+
             });
     }, 5000);
+
+    let count=0;
+    it('GET with role query param', function(done) {
+
+        chai.request(app)
+            .get("/api/employee?role=ADMINISTRATOR")
+            .set("Authorization", "Bearer " + adminToken)
+            .end((err, res) => {
+                res.should.have.status(200);
+                for(let i in res.body) {
+                    res.body[i].role.should.eq("ADMINISTRATOR");
+                    if(res.body[i].emailAddress === "admin.vomberuf@students.fhnw.ch") {
+                        count = count + 1;
+                    }
+                }
+
+                chai.request(app)
+                    .get("/api/employee?role=PROJECTMANAGER")
+                    .set("Authorization", "Bearer " + adminToken)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        for(let i in res.body) {
+                            res.body[i].role.should.eq("PROJECTMANAGER");
+                            if(res.body[i].emailAddress === "wallah.habibi@students.fhnw.ch") {
+                                count = count + 1;
+                            }
+                        }
+
+                        chai.request(app)
+                            .get("/api/employee?role=DEVELOPER")
+                            .set("Authorization", "Bearer " + adminToken)
+                            .end((err, res) => {
+                                res.should.have.status(200);
+                                for(let i in res.body) {
+                                    res.body[i].role.should.eq("DEVELOPER");
+                                    if(res.body[i].emailAddress === "john.doe@students.fhnw.ch") {
+                                        count = count + 1;
+                                    }
+                                }
+                                chai.expect(count).to.equal(3) //unsere 3 employees müssen vorkommen bei der jeweils richtigen query
+
+                                chai.request(app)
+                                    .get("/api/employee?role=DOESNOTEXIST")
+                                    .set("Authorization", "Bearer " + adminToken)
+                                    .end((err, res) => {
+                                        res.should.have.status(412);
+
+                                        done();
+                                    });
+                            });
+                    });
+            });
+    });
 
     it('DELETE one employee', function(done) {
         chai.request(app)
-            .delete("/api/employee/" + id)
-            .set("Authorization", "Bearer " + token)
+            .delete("/api/employee/" + idToDelete)
+            .set("Authorization", "Bearer " + adminToken)
             .end((err, res) => {
                 res.should.have.status(204);
-                done();
+
+                chai.request(app)
+                    .get("/api/employee/" + idToDelete)
+                    .set("Authorization", "Bearer " + adminToken)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.firstName.should.eq("ANONYMIZED");
+                        res.body.lastName.should.eq("ANONYMIZED");
+                        res.body.active.should.eq(false);
+                        done();
+                    });
             });
     }, 5000);
 
-    it('GET all employees (one less)', function(done) {
+    it('UPDATE an employee', function(done) {
         chai.request(app)
-            .get("/api/employee")
-            .set("Authorization", "Bearer "+token)
+            .put("/api/employee/" + projectManagerId)
+            .set("Authorization", "Bearer " + projectManagerToken)
+            .send({"active":true, "firstName":"Endlich", "lastName":"Seriös", "emailAddress":"endlich.seriös@students.fhnw.ch"})
             .end((err, res) => {
-                id = res.body[0].id;
-                res.should.have.status(200);
-                res.body.length.should.eql(2);
-                done();
+                res.should.have.status(403);
+
+                chai.request(app)
+                    .put("/api/employee/" + projectManagerId)
+                    .set("Authorization", "Bearer " + adminToken)
+                    .send({"active":true, "firstName":"Endlich", "lastName":"Seriös", "emailAddress":"endlich.seriös@students.fhnw.ch"})
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.firstName.should.eq("Endlich");
+                        res.body.lastName.should.eq("Seriös");
+
+                        chai.request(app)
+                            .put("/api/employee/" + projectManagerId)
+                            .set("Authorization", "Bearer " + adminToken)
+                            .send({"firstName":"Endlich", "lastName":"Seriös", "emailAddress":"endlich.seriös@students.fhnw.ch"})
+                            .end((err, res) => {
+                                res.should.have.status(412); //active missing => precondition failed
+
+                                chai.request(app)
+                                    .put("/api/employee/" + projectManagerId*50)
+                                    .set("Authorization", "Bearer " + adminToken)
+                                    .send({"active":true, "firstName":"Endlich", "lastName":"Seriös", "emailAddress":"endlich.seriös@students.fhnw.ch"})
+                                    .end((err, res) => {
+                                        res.should.have.status(404);
+
+                                        done();
+                                    });
+                            });
+                    });
             });
     }, 5000);
 });
