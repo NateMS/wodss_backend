@@ -11,8 +11,16 @@
     {
       "firstName": "Deine",
       "lastName": "Mutter",
-      "active": false,
+      "active": true,
       "emailAddress": "deine.mutter@students.fhnw.ch",
+      "role": "PROJECTMANAGER",
+      "password": "AMKJUNGE110"
+    },
+    {
+      "firstName": "Deine",
+      "lastName": "Mutter2",
+      "active": true,
+      "emailAddress": "deine.mutter2@students.fhnw.ch",
       "role": "PROJECTMANAGER",
       "password": "AMKJUNGE110"
     },
@@ -28,207 +36,69 @@
   "projects": [
     {
       "name": "Projekt1",
-      "ftePercentage": "1500",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
+      "ftePercentage": "1000",
+      "startDate": "2019-01-01",
+      "endDate": "2019-12-31"
     },
     {
       "name": "Projekt2",
       "ftePercentage": "1000",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
+      "startDate": "2019-01-01",
+      "endDate": "2019-12-31"
     },
     {
       "name": "Projekt3",
-      "ftePercentage": "1500",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
-    },
-    {
-      "name": "Projekt4",
       "ftePercentage": "1000",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
-    },
-    {
-      "name": "Projekt5",
-      "ftePercentage": "1500",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
-    },
-    {
-      "name": "Projekt6",
-      "ftePercentage": "1000",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
-    },
-    {
-      "name": "Projekt7",
-      "ftePercentage": "1500",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
-    },
-    {
-      "name": "Projekt8",
-      "ftePercentage": "1000",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
-    },
-    {
-      "name": "Projekt9",
-      "ftePercentage": "1500",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
-    },
-    {
-      "name": "Projekt10",
-      "ftePercentage": "1000",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
-    },
-    {
-      "name": "Projekt11",
-      "ftePercentage": "1500",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
-    },
-    {
-      "name": "Projekt12",
-      "ftePercentage": "1000",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
-    },
-    {
-      "name": "Projekt13",
-      "ftePercentage": "500",
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03"
+      "startDate": "2019-01-01",
+      "endDate": "2019-12-31"
     }
   ],
   "contracts": [
     {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
+      "startDate": "2019-01-01",
+      "endDate": "2019-12-31",
       "pensumPercentage": 100
     },
     {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
+      "startDate": "2019-01-01",
+      "endDate": "2019-12-31",
       "pensumPercentage": 100
     },
     {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
+      "startDate": "2019-01-01",
+      "endDate": "2019-12-31",
       "pensumPercentage": 100
     }
   ],
   "allocations": [
     {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
+      "startDate": "2019-01-01",
+      "endDate": "2019-03-01",
+      "pensumPercentage": 20
     },
     {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
+      "startDate": "2019-03-02",
+      "endDate": "2019-05-01",
+      "pensumPercentage": 20
     },
     {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
+      "startDate": "2019-05-02",
+      "endDate": "2019-07-01",
+      "pensumPercentage": 20
     },
     {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
+      "startDate": "2019-07-02",
+      "endDate": "2019-09-01",
+      "pensumPercentage": 20
     },{
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
+      "startDate": "2019-09-02",
+      "endDate": "2019-11-01",
+      "pensumPercentage": 20
     },
     {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },{
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },{
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
-    },
-    {
-      "startDate": "2018-05-03",
-      "endDate": "2018-10-03",
-      "pensumPercentage": 100
+      "startDate": "2019-11-02",
+      "endDate": "2019-12-31",
+      "pensumPercentage": 20
     }
   ]
 }

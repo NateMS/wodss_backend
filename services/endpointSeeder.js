@@ -34,22 +34,22 @@ async function seedEndpoints() {
 
     for(i=0; i < seed.projects.length; i++) {
         let e = Project(seed.projects[i]);
-        e.projectManagerId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
+        e.projectManagerId = employeeIds[i%2+1];
         e = await e.save();
         projectIds.push(e.id);
     }
 
     for(i=0; i < seed.contracts.length; i++) {
         let e = Contract(seed.contracts[i]);
-        e.employeeId = employeeIds[Math.floor(Math.random() * employeeIds.length)];
+        e.employeeId = employeeIds[i];
         e = await e.save();
         contractIds.push(e.id);
     }
 
     for(i=0; i < seed.allocations.length; i++) {
         let e = Allocation(seed.allocations[i]);
-        e.contractId = contractIds[Math.floor(Math.random() * contractIds.length)];
-        e.projectId  = projectIds[Math.floor(Math.random() * projectIds.length)];
+        e.contractId = contractIds[i%3];
+        e.projectId  = projectIds[i%3];
         e = await e.save();
         allocationIds.push(e.id);
     }

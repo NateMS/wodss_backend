@@ -4,14 +4,26 @@ import * as bcrypt from "bcrypt";
 
 const saltRounds = process.env.SALT_ROUNDS || 10;
 /**
- * Get all posts
+ * Get all employees
  * @param req
  * @param res
  * @returns void
  */
-//todo einpflegen der active-logik (was darf ein employee wenn er nicht active=true ist => guest)
 export function getEmployees(req, res) {
-  Employee.find().exec((err, employees) => {
+  const query = {};
+
+  if(req.query.hasOwnProperty('role')) {
+    const role = req.query.role;
+    if(role !== "ADMINISTRATOR" && role !== "DEVELOPER" && role !== "PROJECTMANAGER") {
+      res.status(412).end();
+      return;
+    } else {
+      query["role"] = { "$eq": role};
+    }
+  }
+
+
+  Employee.find(query).exec((err, employees) => {
     if (err) {
       res.status(500).send(err);
     }
@@ -62,7 +74,7 @@ export function addEmployee(req, res) {
             res.status(500).send(err);
           }
         }else{
-          res.json(saved);
+          res.status(201).json(saved);
         }
       });
     }
