@@ -40,6 +40,66 @@
     },
     {
       "name": "Projekt3",
+      "ftePercentage": "1500",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt4",
+      "ftePercentage": "1000",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt5",
+      "ftePercentage": "1500",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt6",
+      "ftePercentage": "1000",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt7",
+      "ftePercentage": "1500",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt8",
+      "ftePercentage": "1000",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt9",
+      "ftePercentage": "1500",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt10",
+      "ftePercentage": "1000",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt11",
+      "ftePercentage": "1500",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt12",
+      "ftePercentage": "1000",
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03"
+    },
+    {
+      "name": "Projekt13",
       "ftePercentage": "500",
       "startDate": "2018-05-03",
       "endDate": "2018-10-03"
@@ -60,9 +120,101 @@
       "startDate": "2018-05-03",
       "endDate": "2018-10-03",
       "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
     }
   ],
   "allocations": [
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },{
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },{
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },{
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2018-05-03",
+      "endDate": "2018-10-03",
+      "pensumPercentage": 100
+    },
     {
       "startDate": "2018-05-03",
       "endDate": "2018-10-03",

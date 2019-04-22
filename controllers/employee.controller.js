@@ -9,6 +9,7 @@ const saltRounds = process.env.SALT_ROUNDS || 10;
  * @param res
  * @returns void
  */
+//todo einpflegen der active-logik (was darf ein employee wenn er nicht active=true ist => guest)
 export function getEmployees(req, res) {
   Employee.find().exec((err, employees) => {
     if (err) {
@@ -37,7 +38,8 @@ export function addEmployee(req, res) {
   }
 
   const newEmployee = new Employee(req.body);
-  newEmployee.role = req.query.role;
+  newEmployee.active = false; //needs to be set active manually by an admin!
+  newEmployee.role   = req.query.role;
 
   const salt = bcrypt.genSaltSync(saltRounds);
   const hashedPassword = bcrypt.hashSync(req.query.password, salt);
@@ -52,9 +54,7 @@ export function addEmployee(req, res) {
     } else {
       //Password will be hashed by the pre-save hook
       const newCredentials = new Credentials({password: hashedPassword, emailAddress:req.body.emailAddress});
-      console.warn("New credentials created. Saving...");
       newCredentials.save((err, savedCred) => {
-        console.warn("new credentials created.");
         if(err){
           if(err.message.indexOf('duplicate key error') > 0){
             res.sendStatus(412);
@@ -62,7 +62,6 @@ export function addEmployee(req, res) {
             res.status(500).send(err);
           }
         }else{
-          console.warn("Success. Returning...");
           res.json(saved);
         }
       });
@@ -89,26 +88,37 @@ export function getEmployee(req, res) {
 }
 
 /**
- * Delete a employee
+ * Anonymize a employee
  * @param req
  * @param res
  * @returns void
 */
-export function deleteEmployee(req, res) {
-  if(req.employee.role === "DEVELOPER") {
+export function anonymizeEmployee(req, res) {
+  if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).end();
     return;
   }
 
+  //anonymize (hash-value of emailaddress (unique constraint))
   Employee.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
-    if (err) {
+    if(err){
       res.status(500).send(err);
     }else if(!employee){
       res.status(404).end();
-    }else {
-      employee.remove(() => {
-        res.status(204).end();
-      });
+    }else{
+      employee.active = false;
+      employee.firstName = "ANONYMIZED";
+      employee.lastName = "ANONYMIZED";
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const hashedEmail = bcrypt.hashSync(employee.emailAddress, salt);
+      employee.emailAddress = hashedEmail + "@invalid";
+      employee.save((err, saved) => {
+        if(err){
+          res.status(500).send(err);
+        }else{
+          res.status(204).end();
+        }
+      })
     }
   });
 }
@@ -119,7 +129,7 @@ export function deleteEmployee(req, res) {
  * @param res
  */
 export function updateEmployee(req, res){
-  if(req.employee.role === "DEVELOPER") {
+  if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).end();
     return;
   }
