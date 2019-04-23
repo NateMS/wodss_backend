@@ -62,7 +62,6 @@ export async function getProjects(req, res) {
     }
     res.json(projects);
   })
-
 }
 
 /**
@@ -71,8 +70,7 @@ export async function getProjects(req, res) {
  * @param res
  * @returns void
  */
-//todo
-export function addProject(req, res) {
+export async function addProject(req, res) {
   if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).end();
     return;
@@ -85,6 +83,34 @@ export function addProject(req, res) {
       || !req.body.hasOwnProperty('projectManagerId')) {
     res.status(412).end();
     return
+  }
+
+  //Check whether projectmanager exists
+  const emp = await Employee.findById(req.body.projectManagerId).exec();
+  if(emp === null) {
+    res.status(404).send("The projectManager does not exist!").end();
+    return;
+  } else {
+    if(emp.role !== "PROJECTMANAGER") { //is actually projectmanager
+      res.status(412).send("The referenced employee is not a projectManager!").end();
+      return;
+    }
+    if(!emp.active) { //and actually active
+      res.status(412).send("The projectManager is not active!").end();
+      return;
+    }
+  }
+
+  const a = new Date(req.body.startDate), b = new Date(req.body.endDate);
+  if(req.body.hasOwnProperty("startDate") && isNaN(a.getTime())) {
+    res.status(412).send("Invalid date format for startDate!").end();
+    return;
+  } else if(req.body.hasOwnProperty("endDate") && isNaN(b.getTime())) {
+    res.status(412).send("Invalid date format for endDate!").end();
+    return;
+  } else if(a >= b) {
+    res.status(412).send("startDate has to be older than endDate!").end();
+    return;
   }
 
   new Project(req.body).save((err, saved) => {
@@ -102,7 +128,6 @@ export function addProject(req, res) {
  * @param res
  * @returns void
 */
-//todo
 export async function getProject(req, res){
   if(req.employee.role === "DEVELOPER") { //check whether dev is allowed to see the project
     const contractIds =[];
@@ -140,29 +165,19 @@ export async function getProject(req, res){
  * @param res
  * @returns void
 */
-//todo
 export async function deleteProject(req, res) {
   if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).end();
     return;
   }
 
-  Project.findOne({ _id: req.params.id }).exec((err, project) => {
-    if (err) {
-      res.status(500).send(err);
-    }else if(!project){
-      res.status(404).end();
-    }else{
-      project.remove(async () => { //after removing the project, remove all associated allocations
-        await Allocation.find({ projectId: req.params.id }).exec((err, allocation) => {
-          if(!err) {
-            allocation.remove(() => {})
-          }
-        })
-        res.status(204).end(); //successfully deleted
-      });
-    }
-  });
+  const a = await Project.deleteOne({_id: req.params.id}).exec();
+  if(a.deletedCount == 0) { //not found
+    res.status(404).send("Project not found!").end();
+  } else { //deleted, cascade delete on referenced allocations
+    await Allocation.deleteMany({ projectId: req.params.id }).exec();
+    res.status(204).end(); //successfully deleted
+  }
 }
 
 /**
@@ -170,7 +185,6 @@ export async function deleteProject(req, res) {
  * @param req
  * @param res
  */
-//todo
 export async function updateProject(req, res) {
   if(req.employee.role === "DEVELOPER") { //dev is not allowed
     res.status(403).end();
@@ -178,7 +192,10 @@ export async function updateProject(req, res) {
   }
   if(req.employee.role === "PROJECTMANAGER") { //projectmanager of his own projects is allowed
     const project = await Project.findOne({ _id: req.params.id });
-    if(project.projectManagerId !== req.employee._id) {
+    if(!project) { //does the project exist?
+      res.status(404).send("Project not found!").end();
+      return;
+    } else if(project.projectManagerId !== req.employee._id) { //is the authenticated user the projectmanager?
       res.status(403).end();
       return;
     }
@@ -194,19 +211,41 @@ export async function updateProject(req, res) {
     return;
   }
 
+  //Check whether the referenced projectmanager exists and has the role projectmanager
+  const emp = await Employee.findOne({_id: req.body.projectManagerId }).exec();
+  if(!emp) {
+    res.status(404).send("Projectmanager does not exist!").end();
+    return;
+  } else {
+    if(emp.role !== "PROJECTMANAGER") {
+      res.status(412).send("Referenced projectmanager is not of role PROJECTMANAGER!").end();
+      return;
+    }
+  }
+
+  const a = new Date(req.body.startDate), b = new Date(req.body.endDate);
+  if(req.body.hasOwnProperty("startDate") && isNaN(a.getTime())) {
+    res.status(412).send("Invalid date format for startDate!").end();
+    return;
+  } else if(req.body.hasOwnProperty("endDate") && isNaN(b.getTime())) {
+    res.status(412).send("Invalid date format for endDate!").end();
+    return;
+  } else if(a >= b) {
+    res.status(412).send("startDate has to be older than endDate!").end();
+    return;
+  }
+
   //Date adjustment check (endDate in past or exact present is not allowed)
-  if(req.body.endDate < new Date().getTime()) {
-    res.status(412).end();
+  if(new Date(req.body.endDate).getTime() < new Date().getTime()) {
+    res.status(412).send("EndDate has to be in future!").end();
     return;
   } else { //check and adjust all influenced allocations
-    await Allocation.find({ projectId: req.params.id }).exec(async (err, allocation) => {
-      if (allocation.startDate > req.body.endDate) { //delete all future allocations which are beyond the project runtime
-        allocation.remove();
-      } else { //adjust endDate of all allocations to actual projectend's date
-        allocation.endDate = req.body.endDate
-        await allocation.save();
-      }
-    });
+    //delete all future allocations which are beyond the project runtime
+    await Allocation.deleteMany({ $and: [ {projectId: req.params.id}, {startDate: {$gt: req.body.endDate}} ]}).exec();
+
+    //adjust endDate of all allocations to actual projectend's date
+    await Allocation.updateMany({ $and: [ {projectId: req.params.id}, {startDate: {$lte: req.body.endDate}}]},
+        { endDate: req.body.endDate}).exec();
   }
 
   Project.findOne({ _id: {$eq: req.params.id} }).exec((err, project) => {
