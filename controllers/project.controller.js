@@ -29,24 +29,34 @@ export async function getProjects(req, res) {
 
   if(req.query.hasOwnProperty('projectManagerId')) {
     const projectManagerId = req.query.projectManagerId;
+    if(isNaN(projectManagerId)) {
+      res.status(412).send("projectManagerId has to be a number!").end();
+      return;
+    }
+
     query["projectManagerId"] = {$eq: projectManagerId};
 
     //Check whether projectmanager exists
     const emp = await Employee.findById(projectManagerId).exec();
     if(emp === null) {
-      res.status(404).end();
+      res.status(404).send("The projectManager does not exist!").end();
       return;
     }
   }
 
-  const fromDate = req.query.fromDate;
-  const toDate = req.query.toDate;
-  if(new Date(fromDate) > new Date(toDate)) {
-    res.status(412).end();  //Precondition Failed, because it's something the user should fix.
+  const a = new Date(req.query.fromDate), b = new Date(req.query.toDate);
+  if(req.query.hasOwnProperty("fromDate") && isNaN(a.getTime())) {
+    res.status(412).send("Invalid date format for fromDate!").end();
+    return;
+  } else if(req.query.hasOwnProperty("toDate") && isNaN(b.getTime())) {
+    res.status(412).send("Invalid date format for toDate!").end();
+    return;
+  } else if(a >= b) {
+    res.status(412).send("fromDate has to be older than toDate!").end();
     return;
   }
 
-  Project.findInRange(fromDate, toDate).find(query).sort('-dateAdded').exec((err,projects) => {
+  Project.findInRange(req.query.fromDate, req.query.toDate).find(query).sort('-dateAdded').exec((err,projects) => {
     if (err) {
       res.status(500).send(err);
     }
@@ -61,6 +71,7 @@ export async function getProjects(req, res) {
  * @param res
  * @returns void
  */
+//todo
 export function addProject(req, res) {
   if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).end();
@@ -91,6 +102,7 @@ export function addProject(req, res) {
  * @param res
  * @returns void
 */
+//todo
 export async function getProject(req, res){
   if(req.employee.role === "DEVELOPER") { //check whether dev is allowed to see the project
     const contractIds =[];
@@ -128,6 +140,7 @@ export async function getProject(req, res){
  * @param res
  * @returns void
 */
+//todo
 export async function deleteProject(req, res) {
   if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).end();
@@ -157,6 +170,7 @@ export async function deleteProject(req, res) {
  * @param req
  * @param res
  */
+//todo
 export async function updateProject(req, res) {
   if(req.employee.role === "DEVELOPER") { //dev is not allowed
     res.status(403).end();

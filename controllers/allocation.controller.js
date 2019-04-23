@@ -50,7 +50,7 @@ export async function getAllocations(req, res) {
         res.status(412).send("Invalid date format for toDate!").end();
         return;
     } else if(a >= b) {
-        res.status(412).send("fromDate has to be older than endDate!").end();
+        res.status(412).send("fromDate has to be older than toDate!").end();
         return;
     }
 
