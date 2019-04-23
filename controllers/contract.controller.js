@@ -11,7 +11,7 @@ import Allocation from "../models/allocation";
 export function getContracts(req, res) {
     const query = {};
     if(req.employee.role === "DEVELOPER") { //filter for only projects, that the dev is working on
-        query["employeeId"] = {$eq: req.employee._id};
+        query["employeeId"] = { $eq: req.employee._id };
     }
 
     const a = new Date(req.query.fromDate), b = new Date(req.query.toDate);
@@ -133,15 +133,14 @@ export async function deleteContract(req, res) {
         return;
     }
 
-    Contract.findOne({ _id: {$eq: req.params.id} }).exec((err, contract) => {
+    Contract.findOne({ _id: {$eq: req.params.id} }).exec(async (err, contract) => {
         if (err) {
             res.status(500).send(err);
         }else if(!contract){
             res.status(404).send("Contract not found!").end();
         }else {
-            contract.remove(() => {
-                res.status(204).end();
-            });
+            await Contract.deleteOne( { _id: {$eq: req.params.id} });
+            res.status(204).end();
         }
     });
 }

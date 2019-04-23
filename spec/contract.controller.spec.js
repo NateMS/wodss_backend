@@ -26,17 +26,9 @@ const testData = {
         },
         {
             "firstName": "Project",
-            "lastName": "Manager1",
+            "lastName": "Manager",
             "active": true,
-            "emailAddress": "project.manager1@students.fhnw.ch",
-            "role": "PROJECTMANAGER",
-            "password": "AMKJUNGE110"
-        },
-        {
-            "firstName": "Project",
-            "lastName": "Manager2",
-            "active": true,
-            "emailAddress": "project.manager2@students.fhnw.ch",
+            "emailAddress": "project.manager@students.fhnw.ch",
             "role": "PROJECTMANAGER",
             "password": "AMKJUNGE110"
         },
@@ -124,22 +116,17 @@ let employeeIds   = [];
 let projectIds    = [];
 let contractIds   = [];
 let allocationIds = [];
-let countProjectsBefore = 0;
-let countAllocationsBefore = 0;
+let countContractsBefore = 0;
 
-let projectManager1Token;
-let projectManager2Token;
+let projectManagerToken;
 let adminToken;
 let devToken;
 
-describe('testing the project endpoint', () => {
+describe('testing the contract endpoint', () => {
     beforeAll(async function() {
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 40; i++) {
             const numElems1 = await Project.countDocuments().exec();
-            countProjectsBefore = await numElems1;
-
-            const numElems2 = await Allocation.countDocuments().exec();
-            countAllocationsBefore = await numElems2;
+            countContractsBefore = await numElems1;
         }
         let i;
 
@@ -163,15 +150,15 @@ describe('testing the project endpoint', () => {
 
         for(i=0; i < testData.contracts.length; i++) {
             let e = Contract(testData.contracts[i]);
-            e.employeeId = employeeIds[i+1];
+            e.employeeId = employeeIds[i];
             e = await e.save();
             contractIds.push(e.id);
         }
 
         for(i=0; i < testData.allocations.length; i++) {
             let e = Allocation(testData.allocations[i]);
-            e.contractId = contractIds[(1+i)%3];
-            e.projectId  = projectIds[(1+i)%3];
+            e.contractId = contractIds[i%3];
+            e.projectId  = projectIds[i%3];
             e = await e.save();
             allocationIds.push(e.id);
         }
@@ -192,19 +179,14 @@ describe('testing the project endpoint', () => {
 
     it('Get admin, dev & projectmanager token', function(done) {
         let adminIndex = 0;
-        let projectManager1Index = -1;
-        let projectManager2Index = -1;
+        let projectManagerIndex = 0;
         let devIndex = 0;
+
         for(let i in testData.employees) {
             if(testData.employees[i].role === "ADMINISTRATOR") {
                 adminIndex = i;
             } else if(testData.employees[i].role === "PROJECTMANAGER") {
-                if(projectManager1Index === -1) {
-                    projectManager1Index = i;
-                } else {
-                    projectManager2Index = i;
-                }
-
+                projectManagerIndex = i;
             } else {
                 devIndex = i;
             }
@@ -218,21 +200,50 @@ describe('testing the project endpoint', () => {
 
                 chai.request(app)
                     .post("/api/token")
-                    .send({"emailAddress": testData.employees[projectManager1Index].emailAddress, "rawPassword": testData.employees[projectManager1Index].password})
+                    .send({"emailAddress": testData.employees[projectManagerIndex].emailAddress, "rawPassword": testData.employees[projectManagerIndex].password})
                     .end((err, res) => {
-                        projectManager1Token = res.body.token;
+                        projectManagerToken = res.body.token;
 
                         chai.request(app)
                             .post("/api/token")
-                            .send({"emailAddress": testData.employees[projectManager2Index].emailAddress, "rawPassword": testData.employees[projectManager2Index].password})
+                            .send({"emailAddress": testData.employees[devIndex].emailAddress, "rawPassword": testData.employees[devIndex].password})
                             .end((err, res) => {
-                                projectManager2Token = res.body.token;
+                                devToken = res.body.token;
+
+                                done();
+                            });
+                    });
+            });
+    });
+
+    it('GET contracts', function(done) {
+        chai.request(app)
+            .get("/api/contract")
+            .set("Authorization", "Bearer " + devToken)
+            .end((err, res) => {
+                res.status.should.eq(200);
+                res.body.length.should.eq(1); //nur ein contract
+
+                chai.request(app)
+                    .get("/api/contract")
+                    .set("Authorization", "Bearer " + adminToken)
+                    .end((err, res) => {
+                        res.status.should.eq(200);
+                        res.body.length.should.eq(countContractsBefore + testData.contracts.length);
+
+                        chai.request(app)
+                            .get("/api/contract?fromDate=2018-01-01")
+                            .set("Authorization", "Bearer " + projectManagerToken)
+                            .end((err, res) => {
+                                res.status.should.eq(200);
+                                res.body.length.should.eq(countContractsBefore + testData.contracts.length);
 
                                 chai.request(app)
-                                    .post("/api/token")
-                                    .send({"emailAddress": testData.employees[devIndex].emailAddress, "rawPassword": testData.employees[devIndex].password})
+                                    .get("/api/contract?toDate=2000-01-01")
+                                    .set("Authorization", "Bearer " + projectManagerToken)
                                     .end((err, res) => {
-                                        devToken = res.body.token;
+                                        res.status.should.eq(200);
+                                        res.body.length.should.eq(0);
 
                                         done();
                                     });
@@ -241,99 +252,68 @@ describe('testing the project endpoint', () => {
             });
     });
 
-    it('GET projects', function(done) {
+    let createdContract;
+    it('CREATE contract', function(done) {
         chai.request(app)
-            .get("/api/project")
-            .set("Authorization", "Bearer " + devToken)
-            .end((err, res) => {
-                res.status.should.eq(200);
-                res.body.length.should.eq(1); //er arbeitet nur auf einem der Projekte (siehe Testdaten)
-
-                chai.request(app)
-                    .get("/api/project")
-                    .set("Authorization", "Bearer " + projectManager2Token)
-                    .end((err, res) => {
-                        res.status.should.eq(200);
-                        res.body.length.should.eq(countProjectsBefore + testData.projects.length);
-
-                        chai.request(app)
-                            .get("/api/project?projectManagerId=" + employeeIds[1]) //projectManager1
-                            .set("Authorization", "Bearer " + projectManager1Token)
-                            .end((err, res) => {
-                                res.status.should.eq(200);
-                                res.body.length.should.eq(2);
-
-                                done();
-                            });
-                    });
-            });
-    });
-
-    let createdProjectId;
-    it('CREATE projects', function(done) {
-        chai.request(app)
-            .post("/api/project")
-            .set("Authorization", "Bearer " + projectManager2Token)
-            .send({"name": "TestProjectXX", "ftePercentage": 1500, "startDate": "2019-03-01", "endDate": "2019-08-01", "projectManagerId": employeeIds[2]})
-            .end((err, res) => {
-                res.status.should.eq(403); // only admin is allowed
-
-                chai.request(app)
-                    .post("/api/project")
-                    .set("Authorization", "Bearer " + adminToken)
-                    .send({"ftePercentage": 1500, "startDate": "2019-03-01", "endDate": "2019-08-01", "projectManagerId": employeeIds[2]})
-                    .end((err, res) => {
-                        res.status.should.eq(412); //missing projectname
-
-                        chai.request(app)
-                            .post("/api/project")
-                            .set("Authorization", "Bearer " + adminToken)
-                            .send({"name": "TestProjectXX", "ftePercentage": 1500, "startDate": "2019-03-01", "endDate": "2019-08-01", "projectManagerId": employeeIds[2]})
-                            .end(async (err, res) => {
-                                res.status.should.eq(201); //successfully created!
-
-                                const p = await Project.findOne({ "name": "TestProjectXX" }).exec();
-                                createdProjectId = p._id;
-
-                                done();
-                            });
-                    });
-            });
-    });
-
-    it('DELETE project', function(done) {
-        chai.request(app)
-            .delete("/api/project/" + createdProjectId)
+            .post("/api/contract")
             .set("Authorization", "Bearer " + adminToken)
+            .send({"pensumPercentage": 100, "startDate": "2019-03-01", "endDate": "2019-08-01", "employeeId": employeeIds[0]})
             .end((err, res) => {
+                res.status.should.eq(412); // already another contract inside this timerange
+
+                chai.request(app)
+                    .post("/api/contract")
+                    .set("Authorization", "Bearer " + adminToken)
+                    .send({"pensumPercentage": 100, "startDate": "2021-03-01", "endDate": "2021-08-01", "employeeId": employeeIds[0]*50})
+                    .end((err, res) => {
+                        res.status.should.eq(404); //employee does not exist
+
+                        chai.request(app)
+                            .post("/api/contract")
+                            .set("Authorization", "Bearer " + adminToken)
+                            .send({"pensumPercentage": 100, "startDate": "2021-03-01", "endDate": "2021-08-01", "employeeId": employeeIds[0]})
+                            .end(async (err, res) => {
+                                res.status.should.eq(200); //no interference
+
+                                const c = await Contract.findOne({ "employeeId": employeeIds[0], "startDate": "2021-03-01", "endDate": "2021-08-01"}).exec();
+                                createdContract = c._id;
+
+                                done();
+                            });
+                    });
+            });
+    });
+
+    it('DELETE contract', function(done) {
+        chai.request(app)
+            .delete("/api/contract/" + createdContract)
+            .set("Authorization", "Bearer " + adminToken)
+            .end(async (err, res) => {
                 res.status.should.eq(204); // successfully deleted
 
                 chai.request(app)
-                    .delete("/api/project/" + projectIds[1]) //this should cause to cascade remove 2 allocations
+                    .delete("/api/contract/" + contractIds[1])
                     .set("Authorization", "Bearer " + adminToken)
                     .end(async (err, res) => {
-                        res.status.should.eq(204); // successfully deleted
-
-                        const allocations = await Allocation.find().exec();
-                        chai.expect(allocations.length).to.equal(countAllocationsBefore + testData.allocations.length - 2); //2 less
+                        res.status.should.eq(412); // allocations associated, so don't delete
 
                         done();
                     });
             });
     });
 
-    it('GET deleted project and test dev restrictions', function(done) {
+    it('GET deleted contract and test dev restrictions', function(done) {
         chai.request(app)
-            .get("/api/project/" + createdProjectId)
+            .get("/api/contract/" + createdContract)
             .set("Authorization", "Bearer " + adminToken)
             .end((err, res) => {
-                res.status.should.eq(404); // successfully deleted
+                res.status.should.eq(404); // successfully deleted before
 
                 chai.request(app)
-                    .get("/api/project/" + projectIds[0])
+                    .get("/api/contract/" + contractIds[0])
                     .set("Authorization", "Bearer " + devToken)
                     .end((err, res) => {
-                        res.status.should.eq(403); // successfully deleted
+                        res.status.should.eq(403); // not sufficient permissions
 
                         done();
                     });
@@ -341,33 +321,31 @@ describe('testing the project endpoint', () => {
 
     });
 
-    it('UPDATE a project', function(done) {
+    it('UPDATE a contract', function(done) {
         chai.request(app)
-            .put("/api/project/" + projectIds[0])
-            .set("Authorization", "Bearer " + devToken) //no dev can change a project
-            .send({"name": "TestProjectXX", "ftePercentage": 1500, "startDate": "2019-03-01", "endDate": "2019-08-01", "projectManagerId": employeeIds[1]})
+            .put("/api/contract/" + contractIds[0])
+            .set("Authorization", "Bearer " + projectManagerToken)
+            .send({"startDate": "2019-03-01", "endDate": "2019-08-01", "pensumPercentage": 60, "employeeId":employeeIds[0]})
             .end((err, res) => {
-                res.status.should.eq(403); // successfully deleted
+                res.status.should.eq(403); // insufficient permissions for non-admin
 
                 chai.request(app)
-                    .put("/api/project/" + projectIds[0])
-                    .set("Authorization", "Bearer " + projectManager2Token) //try to change another projectmanager's project
-                    .send({"name": "TestProjectXX", "ftePercentage": 1500, "startDate": "2019-03-01", "endDate": "2019-08-01", "projectManagerId": employeeIds[1]})
+                    .put("/api/contract/" + contractIds[0])
+                    .set("Authorization", "Bearer " + adminToken)
+                    .send({"startDate": "2019-03-01", "endDate": "2019-08-01", "pensumPercentage": 60, "employeeId":employeeIds[1]})
                     .end((err, res) => {
-                        res.status.should.eq(403); // not authorized
+                        res.status.should.eq(412); // collides with other contract of this employee
 
                         chai.request(app)
-                            .put("/api/project/" + projectIds[0])
-                            .set("Authorization", "Bearer " + projectManager1Token) //try to change another projectmanager's project
-                            .send({"name": "TestProjectXX", "ftePercentage": 1500, "startDate": "2019-06-01", "endDate": "2019-06-02", "projectManagerId": employeeIds[2]})
-                            .end(async (err, res) => {
+                            .put("/api/contract/" + contractIds[0])
+                            .set("Authorization", "Bearer " + adminToken) //try to change another projectmanager's project
+                            .send({"startDate": "2022-03-01", "endDate": "2022-08-01", "pensumPercentage": 60, "employeeId":employeeIds[1]})
+                            .end((err, res) => {
                                 res.status.should.eq(200); // successfully deleted
-                                res.body.name.should.eq("TestProjectXX");
-                                res.body.projectManagerId.should.eq(employeeIds[2]);
+                                res.body.employeeId.should.eq(employeeIds[1]);
 
-                                //das datum wurde angepasst in die vergangenheit
-                                const allocations = await Allocation.find().exec();
-                                chai.expect(allocations.length).to.equal(countAllocationsBefore + testData.allocations.length - 4); //2 less
+                                done();
+                                /*
 
                                 //try to do same call again after chaging the projectManager (has to fail!)
                                 chai.request(app)
@@ -387,10 +365,15 @@ describe('testing the project endpoint', () => {
                                                 done();
                                             });
                                     });
+                                    */
                             });
+
+
                     });
             });
+
     });
+
 });
 
 
