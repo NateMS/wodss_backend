@@ -199,26 +199,35 @@ export function getAllocation(req, res) {
         return;
     }
 
+
+
     Allocation.findOne({ _id: {$eq: req.params.id} }).exec(async (err, allocation) => {
-        let isAllowed=false;
-        if(req.employee.role === "DEVELOPER") {
-            let contracts = await Contract.find({employeeId: req.employee._id}).exec();
-            for(const i in contracts) {
-                if(allocation.contractId === contracts[i]._id) {
+        if(err) {
+            res.status(500).send(err);
+        } else {
+            if(!allocation) {
+                res.status(404).send("Allocation not found!").end();
+            } else {
+                let isAllowed=false;
+
+                if(req.employee.role === "DEVELOPER") {
+                    let contracts = await Contract.find({employeeId: req.employee._id}).exec();
+                    for(const i in contracts) {
+                        if(allocation.contractId === contracts[i]._id) {
+                            isAllowed=true;
+                            break;
+                        }
+                    }
+                } else {
                     isAllowed=true;
-                    break;
+                }
+
+                if(!isAllowed) {
+                    res.status(403).end();
+                } else {
+                    res.json(allocation);
                 }
             }
-        }
-
-        if (err) {
-            res.status(500).send(err);
-        }else if(!isAllowed) {
-            res.status(403).end();
-        } else if(!allocation){
-            res.status(404).end();
-        }else{
-            res.json(allocation);
         }
     });
 }
