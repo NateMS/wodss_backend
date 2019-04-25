@@ -345,35 +345,10 @@ describe('testing the contract endpoint', () => {
                                 res.body.employeeId.should.eq(employeeIds[1]);
 
                                 done();
-                                /*
-
-                                //try to do same call again after chaging the projectManager (has to fail!)
-                                chai.request(app)
-                                    .put("/api/project/" + projectIds[0])
-                                    .set("Authorization", "Bearer " + projectManager1Token) //try to change another projectmanager's project
-                                    .send({"name": "TestProjectXX", "ftePercentage": 1500, "startDate": "2019-03-01", "endDate": "2019-08-01", "projectManagerId": employeeIds[2]})
-                                    .end((err, res) => {
-                                        res.status.should.eq(403); // not authorized
-
-                                        chai.request(app)
-                                            .put("/api/project/" + projectIds[0])
-                                            .set("Authorization", "Bearer " + projectManager2Token) //try to change another projectmanager's project
-                                            .send({"name": "TestProjectXX", "ftePercentage": 1500, "startDate": "2019-06-01", "endDate": "2019-06-02", "projectManagerId": employeeIds[3]})
-                                            .end(async (err, res) => {
-                                                res.status.should.eq(412); // developer cannot be assigned as projectmanager!
-
-                                                done();
-                                            });
-                                    });
-                                    */
                             });
-
-
                     });
             });
-
     });
-
 });
 
 

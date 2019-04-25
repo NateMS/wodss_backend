@@ -15,17 +15,18 @@ export function getEmployees(req, res) {
   if(req.query.hasOwnProperty('role')) {
     const role = req.query.role;
     if(role !== "ADMINISTRATOR" && role !== "DEVELOPER" && role !== "PROJECTMANAGER") {
-      res.status(412).end();
+      res.status(412).send("Invalid role query parameter!").end();
       return;
     } else {
       query["role"] = { "$eq": role};
     }
   }
 
-
+  //find the employee by using the query
   Employee.find(query).exec((err, employees) => {
     if (err) {
-      res.status(500).send(err);
+      res.status(500).send(err).end();
+      return;
     }
     res.json(employees);
   });
@@ -44,8 +45,7 @@ export function addEmployee(req, res) {
       || !req.body.hasOwnProperty('emailAddress')
       || !req.query.hasOwnProperty('password')
       || !req.query.hasOwnProperty('role')) {
-
-    res.status(412).end();
+    res.status(412).send("Missing property (active, firstName, lastName, emailAddress, password or role").end();
     return
   }
 
@@ -65,7 +65,7 @@ export function addEmployee(req, res) {
       }
     } else {
       //Password will be hashed by the pre-save hook
-      const newCredentials = new Credentials({password: hashedPassword, emailAddress:req.body.emailAddress});
+      const newCredentials = new Credentials({password: hashedPassword, emailAddress: req.body.emailAddress});
       newCredentials.save((err, savedCred) => {
         if(err){
           if(err.message.indexOf('duplicate key error') > 0){
@@ -92,7 +92,7 @@ export function getEmployee(req, res) {
     if (err) {
       res.status(500).send(err);
     }else if(!employee){
-      res.status(404).end();
+      res.status(404).send("Employee does not exist!").end();
     }else{
       res.json(employee);
     }
@@ -106,8 +106,8 @@ export function getEmployee(req, res) {
  * @returns void
 */
 export function anonymizeEmployee(req, res) {
-  if(req.employee.role !== "ADMINISTRATOR") {
-    res.status(403).end();
+  if(req.employee.role !== "ADMINISTRATOR") { //only admin has the ability
+    res.status(403).send("No admin rights!").end();
     return;
   }
 
@@ -116,14 +116,14 @@ export function anonymizeEmployee(req, res) {
     if(err){
       res.status(500).send(err);
     }else if(!employee){
-      res.status(404).end();
-    }else{
+      res.status(404).send("Employee does not exist!").end();
+    }else{ //Anonymize Employee
       employee.active = false;
       employee.firstName = "ANONYMIZED";
       employee.lastName = "ANONYMIZED";
       const salt = bcrypt.genSaltSync(saltRounds);
       const hashedEmail = bcrypt.hashSync(employee.emailAddress, salt);
-      employee.emailAddress = hashedEmail + "@invalid";
+      employee.emailAddress = hashedEmail + "@invalid"; //email has to be unique!
       employee.save((err, saved) => {
         if(err){
           res.status(500).send(err);
@@ -142,7 +142,7 @@ export function anonymizeEmployee(req, res) {
  */
 export function updateEmployee(req, res){
   if(req.employee.role !== "ADMINISTRATOR") {
-    res.status(403).end();
+    res.status(403).send("No admin rights!").end();
     return;
   }
 
@@ -151,7 +151,7 @@ export function updateEmployee(req, res){
       || !req.body.hasOwnProperty('firstName')
       || !req.body.hasOwnProperty('lastName')
       || !req.body.hasOwnProperty('emailAddress')){
-    res.status(412).send(req.body);
+    res.status(412).send("Missing property (active, firstName, lastName, emailAddress, password or role").end();
     return;
   }
 
@@ -160,7 +160,7 @@ export function updateEmployee(req, res){
       res.status(500).send(err);
     }else if(!employee){
       res.status(404).end();
-    }else{
+    }else{ //actually update
       employee.active = req.body.active;
       employee.firstName = req.body.firstName;
       employee.lastName = req.body.lastName;

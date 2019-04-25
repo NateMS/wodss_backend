@@ -16,10 +16,10 @@ export async function getProjects(req, res) {
   const contractIds = [];
   if(req.employee.role === "DEVELOPER") { //filter for only projects, that the dev is working on
     const contracts = await Contract.find({employeeId: req.employee._id});
-    for(let i = 0; i < contracts.length; i++) {
+    for(let i = 0; i < contracts.length; i++) { //contracts of the employee
       contractIds.push(contracts[i]._id);
     }
-    const allocations = await Allocation.find({contractId: { "$in" : contractIds}});
+    const allocations = await Allocation.find({contractId: { "$in" : contractIds}}); //get allocations using the contracts of an employee
     for(let i = 0; i < allocations.length; i++) {
       projectIds.push(allocations[i].projectId);
     }
@@ -29,7 +29,7 @@ export async function getProjects(req, res) {
 
   if(req.query.hasOwnProperty('projectManagerId')) {
     const projectManagerId = req.query.projectManagerId;
-    if(isNaN(projectManagerId)) {
+    if(isNaN(projectManagerId)) { //prevent 500
       res.status(412).send("projectManagerId has to be a number!").end();
       return;
     }
@@ -44,6 +44,7 @@ export async function getProjects(req, res) {
     }
   }
 
+  //check the rime-range
   const a = new Date(req.query.fromDate), b = new Date(req.query.toDate);
   if(req.query.hasOwnProperty("fromDate") && isNaN(a.getTime())) {
     res.status(412).send("Invalid date format for fromDate!").end();
@@ -72,7 +73,7 @@ export async function getProjects(req, res) {
  */
 export async function addProject(req, res) {
   if(req.employee.role !== "ADMINISTRATOR") {
-    res.status(403).end();
+    res.status(403).send("No admin rights!").end();
     return;
   }
 
@@ -81,8 +82,8 @@ export async function addProject(req, res) {
       || !req.body.hasOwnProperty('startDate')
       || !req.body.hasOwnProperty('endDate')
       || !req.body.hasOwnProperty('projectManagerId')) {
-    res.status(412).end();
-    return
+    res.status(412).send("Missing property (ftePercentage, startDate, endDate or projectManagerId").end();
+    return;
   }
 
   //Check whether projectmanager exists
@@ -101,6 +102,7 @@ export async function addProject(req, res) {
     }
   }
 
+  //check time-range
   const a = new Date(req.body.startDate), b = new Date(req.body.endDate);
   if(req.body.hasOwnProperty("startDate") && isNaN(a.getTime())) {
     res.status(412).send("Invalid date format for startDate!").end();
@@ -123,7 +125,7 @@ export async function addProject(req, res) {
 }
 
 /**
- * Get a single employee
+ * Get a single project
  * @param req
  * @param res
  * @returns void
@@ -143,7 +145,7 @@ export async function getProject(req, res){
       }
     }
     if(!isAllowed) {
-      res.status(403).end();
+      res.status(403).send("You are not authorized to see this project!").end();
       return;
     }
   }
@@ -152,7 +154,7 @@ export async function getProject(req, res){
     if (err) {
       res.status(500).send(err);
     }else if(!project){
-      res.status(404).end();
+      res.status(404).send("This project does not exist!").end();
     }else{
       res.json(project);
     }
@@ -167,7 +169,7 @@ export async function getProject(req, res){
 */
 export async function deleteProject(req, res) {
   if(req.employee.role !== "ADMINISTRATOR") {
-    res.status(403).end();
+    res.status(403).send("No admin rights!").end();
     return;
   }
 
@@ -181,13 +183,13 @@ export async function deleteProject(req, res) {
 }
 
 /**
- * Updates the specified employee
+ * Updates the specified project
  * @param req
  * @param res
  */
 export async function updateProject(req, res) {
   if(req.employee.role === "DEVELOPER") { //dev is not allowed
-    res.status(403).end();
+    res.status(403).send("Missing permissions!").end();
     return;
   }
   if(req.employee.role === "PROJECTMANAGER") { //projectmanager of his own projects is allowed
@@ -207,7 +209,7 @@ export async function updateProject(req, res) {
       || !req.body.hasOwnProperty('startDate')
       || !req.body.hasOwnProperty('endDate')
       || !req.body.hasOwnProperty('projectManagerId')){
-    res.status(412).end();
+    res.status(412).send("Missing property (ftePercentage, startDate, endDate or projectManagerId").end();
     return;
   }
 
@@ -223,6 +225,7 @@ export async function updateProject(req, res) {
     }
   }
 
+  //check time-range
   const a = new Date(req.body.startDate), b = new Date(req.body.endDate);
   if(req.body.hasOwnProperty("startDate") && isNaN(a.getTime())) {
     res.status(412).send("Invalid date format for startDate!").end();
@@ -252,8 +255,8 @@ export async function updateProject(req, res) {
     if(err){
       res.status(500).send(err);
     }else if(!project){
-      res.status(404).end();
-    }else{
+      res.status(404).send("Project not found!").end();
+    }else{ //actually adjust
       project.name = req.body.name;
       project.ftePercentage = req.body.ftePercentage;
       project.startDate = req.body.startDate;

@@ -273,7 +273,6 @@ export function deleteAllocation(req, res) {
     });
 }
 
-
 /**
  * Updates the specified allocation
  * @param req

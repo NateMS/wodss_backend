@@ -29,8 +29,10 @@ export function getContracts(req, res) {
     Contract.findInRange(req.query.fromDate, req.query.toDate).find(query).sort('-dateAdded').exec((err, contracts) => {
         if (err) {
             res.status(500).send(err);
+            return;
+        } else {
+            res.json(contracts);
         }
-        res.json(contracts);
     });
 }
 
@@ -50,11 +52,11 @@ export async function addContract(req, res) {
         || !req.body.hasOwnProperty('endDate')
         || !req.body.hasOwnProperty('pensumPercentage')
         || !req.body.hasOwnProperty('employeeId')) {
-
-        res.status(412).end();
+        res.status(412).send("Missing property (startDate, endDate, pensumPercentage or employeeId").end();
         return;
     }
 
+    //check time-range
     const a = new Date(req.body.startDate), b = new Date(req.body.endDate);
     if(req.body.hasOwnProperty("startDate") && isNaN(a.getTime())) {
         res.status(412).send("Invalid date format for fromDate!").end();
@@ -67,9 +69,10 @@ export async function addContract(req, res) {
         return;
     }
 
-    const e = await Employee.findOne({ _id: req.body.employeeId }).exec();
+    //Does the referenced employee exist?
+    const e = await Employee.findOne({ _id: {$eq: req.body.employeeId}}).exec();
     if(!e) {
-        res.status(404).end();
+        res.status(404).send("The referenced employee does not exist!").end();
         return;
     }
 
@@ -83,7 +86,7 @@ export async function addContract(req, res) {
     const newContract = new Contract(req.body);
     newContract.save((err, saved) => {
         if (err) {
-            res.status(500).end();
+            res.status(500).send(err).end();
         } else {
             res.json(saved);
         }
@@ -101,11 +104,11 @@ export function getContract(req, res) {
         if (err) {
             res.status(500).send(err);
         }else if(!contract){
-            res.status(404).end();
+            res.status(404).send("This contract does not exist!").end();
         }else{
             if(req.employee.role === "DEVELOPER") { //Check whether dev is allowed to see
                 if(contract.employeeId !== req.employee._id) {
-                    res.status(403).end();
+                    res.status(403).send("Your are not authorized to see this contract!").end();
                     return;
                 }
             }
@@ -121,6 +124,7 @@ export function getContract(req, res) {
  * @returns void
  */
 export async function deleteContract(req, res) {
+    //current user has to be admin
     if(req.employee.role !== "ADMINISTRATOR") {
         res.status(403).send("No admin rights!").end();
         return;
@@ -146,7 +150,7 @@ export async function deleteContract(req, res) {
 }
 
 /**
- * Updates the specified employee
+ * Updates the specified contract
  * @param req
  * @param res
  */
@@ -164,9 +168,13 @@ export async function updateContract(req, res){
         return;
     }
 
+    //check time-range
     const a = new Date(req.body.startDate), b = new Date(req.body.endDate);
-    if(isNaN(a.getTime()) || isNaN(b.getTime())) {
-        res.status(412).send("Invalid date format for either fromDate or endDate param!").end();
+    if(req.body.hasOwnProperty("startDate") && isNaN(a.getTime())) {
+        res.status(412).send("Invalid date format for fromDate!").end();
+        return;
+    } else if(req.body.hasOwnProperty("endDate") && isNaN(b.getTime())) {
+        res.status(412).send("Invalid date format for endDate!").end();
         return;
     } else if(a >= b) {
         res.status(412).send("fromDate has to be older than endDate!").end();
@@ -174,20 +182,17 @@ export async function updateContract(req, res){
     }
 
     //Does the referenced employee exist?
-    await Employee.findOne({ _id: {$eq: req.body.employeeId}}).exec((err, e) => {
-        if(err){
-            res.status(500).send(err);
-        }else if(!e){
-            res.status(404).end();
-        }
+    const e = await Employee.findOne({ _id: {$eq: req.body.employeeId}}).exec();
+    if(!e) {
+        res.status(404).send("The referenced employee does not exist!").end();
         return;
-    });
+    }
 
     Contract.findOne({ _id: {$eq: req.params.id} }).exec(async (err, contract) => {
         if(err){
             res.status(500).send(err);
         }else if(!contract){
-            res.status(404).end();
+            res.status(404).send("This contract does not exist yet!").end();
         }else{
             //check whether the change time-range could interfere with another existing contract
             const contracts = await Contract.findInRange(req.body.startDate, req.body.endDate).find({ employeeId: req.body.employeeId}).exec();
@@ -198,6 +203,7 @@ export async function updateContract(req, res){
                 }
             }
 
+            //update values
             contract.startDate = req.body.startDate;
             contract.endDate = req.body.endDate;
             contract.pensumPercentage = req.body.pensumPercentage;
