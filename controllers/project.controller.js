@@ -131,6 +131,11 @@ export async function addProject(req, res) {
  * @returns void
 */
 export async function getProject(req, res){
+  if(isNaN(req.params.id)) {
+    res.status(412).send("id param has to be a number!").end();
+    return;
+  }
+
   if(req.employee.role === "DEVELOPER") { //check whether dev is allowed to see the project
     const contractIds =[];
     const allocations = await Allocation.find({projectId: req.params.id });
@@ -168,6 +173,11 @@ export async function getProject(req, res){
  * @returns void
 */
 export async function deleteProject(req, res) {
+  if(isNaN(req.params.id)) {
+    res.status(412).send("id param has to be a number!").end();
+    return;
+  }
+
   if(req.employee.role !== "ADMINISTRATOR") {
     res.status(403).send("No admin rights!").end();
     return;
@@ -188,6 +198,11 @@ export async function deleteProject(req, res) {
  * @param res
  */
 export async function updateProject(req, res) {
+  if(isNaN(req.params.id)) {
+    res.status(412).send("id param has to be a number!").end();
+    return;
+  }
+
   if(req.employee.role === "DEVELOPER") { //dev is not allowed
     res.status(403).send("Missing permissions!").end();
     return;
