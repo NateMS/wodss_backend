@@ -1,8 +1,10 @@
 import Employee from '../models/employee';
 import Credentials from '../models/credentials'
 import * as bcrypt from "bcrypt";
+import * as Role from '../models/roles'
 
 const saltRounds = process.env.SALT_ROUNDS || 10;
+
 /**
  * Get all employees
  * @param req
@@ -14,11 +16,11 @@ export function getEmployees(req, res) {
 
   if(req.query.hasOwnProperty('role')) {
     const role = req.query.role;
-    if(role !== "ADMINISTRATOR" && role !== "DEVELOPER" && role !== "PROJECTMANAGER") {
+    if(!isValidRole(role)) {
       res.status(412).send("Invalid role query parameter!").end();
       return;
     } else {
-      query["role"] = { "$eq": role};
+      query["role"] = {$eq: role};
     }
   }
 
@@ -39,14 +41,18 @@ export function getEmployees(req, res) {
  * @returns void
  */
 export function addEmployee(req, res) {
-  if (!req.body.hasOwnProperty('active')
-      || !req.body.hasOwnProperty('firstName')
+  if (!req.body.hasOwnProperty('firstName')
       || !req.body.hasOwnProperty('lastName')
       || !req.body.hasOwnProperty('emailAddress')
       || !req.query.hasOwnProperty('password')
       || !req.query.hasOwnProperty('role')) {
-    res.status(412).send("Missing property (active, firstName, lastName, emailAddress, password or role").end();
+    res.status(412).send("Missing property (firstName, lastName, emailAddress, password or role").end();
     return
+  }
+
+  if(!isValidRole(req.query.role)){
+    res.status(412).send("Invalid role query parameter. Must be one of DEVELOPER, PROJECTMANAGER or ADMINISTRATOR");
+    return;
   }
 
   const newEmployee = new Employee(req.body);
@@ -64,12 +70,13 @@ export function addEmployee(req, res) {
         res.status(500).send(err);
       }
     } else {
-      //Password will be hashed by the pre-save hook
       const newCredentials = new Credentials({password: hashedPassword, emailAddress: req.body.emailAddress});
       newCredentials.save((err, savedCred) => {
         if(err){
           if(err.message.indexOf('duplicate key error') > 0){
-            res.sendStatus(412);
+            res.sendStatus(500).send("Something went wrong. An employee with the given mail was created, but there " +
+                "were already existing credentials for this mail. Please contact your system administrator.");
+                //this should NEVER be able to happen
           }else{
             res.status(500).send(err);
           }
@@ -116,7 +123,7 @@ export function anonymizeEmployee(req, res) {
     return;
   }
 
-  if(req.employee.role !== "ADMINISTRATOR") { //only admin has the ability
+  if(req.employee.role !== Role.ADMINISTRATOR) { //only admin has the ability
     res.status(403).send("No admin rights!").end();
     return;
   }
@@ -156,17 +163,16 @@ export function updateEmployee(req, res){
     return;
   }
 
-  if(req.employee.role !== "ADMINISTRATOR") {
+  if(req.employee.role !== Role.ADMINISTRATOR) {
     res.status(403).send("No admin rights!").end();
     return;
   }
 
-  //active can't be validated the same as the others, because a value of "false" would validate to 'false' (Boolean).
   if(!req.body.hasOwnProperty('active')
       || !req.body.hasOwnProperty('firstName')
       || !req.body.hasOwnProperty('lastName')
       || !req.body.hasOwnProperty('emailAddress')){
-    res.status(412).send("Missing property (active, firstName, lastName, emailAddress, password or role").end();
+    res.status(412).send("Missing property (active, firstName, lastName or emailAddress").end();
     return;
   }
 
@@ -189,4 +195,13 @@ export function updateEmployee(req, res){
       })
     }
   });
+}
+
+/**
+ * Validates the parameter 'role' and returns true if it is a valid role and false otherwise.
+ * @param role
+ * @returns {boolean}
+ */
+function isValidRole(role) {
+  return role === Role.ADMINISTRATOR || role === Role.DEVELOPER || role === Role.PROJECTMANAGER
 }
