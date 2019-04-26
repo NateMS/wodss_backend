@@ -80,7 +80,7 @@ projectSchema.statics.findInRange = function(filterStartDate, filterEndDate) {
     } else { //wenn gar keine Limitierungen gesetzt sind
         return this.find(); //max 100 zurückgeben?
     }
-}
+};
 
 projectSchema.virtual('id').get(function () { return this._id; });
 projectSchema.virtual('id').set(function (i) { this._id = i; });
