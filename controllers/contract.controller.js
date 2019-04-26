@@ -1,6 +1,7 @@
 import Contract from '../models/contract';
 import Employee from '../models/employee';
 import Allocation from "../models/allocation";
+import * as Role from '../models/roles'
 
 /**
  * Get all contracts
@@ -10,7 +11,7 @@ import Allocation from "../models/allocation";
  */
 export function getContracts(req, res) {
     const query = {};
-    if(req.employee.role === "DEVELOPER") { //filter for only projects, that the dev is working on
+    if(req.employee.role === Role.DEVELOPER) { //filter for only projects, that the dev is working on
         query["employeeId"] = { $eq: req.employee._id };
     }
 
@@ -29,7 +30,6 @@ export function getContracts(req, res) {
     Contract.findInRange(req.query.fromDate, req.query.toDate).find(query).sort('-dateAdded').exec((err, contracts) => {
         if (err) {
             res.status(500).send(err);
-            return;
         } else {
             res.json(contracts);
         }
@@ -43,7 +43,7 @@ export function getContracts(req, res) {
  * @returns void
  */
 export async function addContract(req, res) {
-    if(req.employee.role !== "ADMINISTRATOR") {
+    if(req.employee.role !== Role.ADMINISTRATOR) {
         res.status(403).end();
         return;
     }
@@ -77,7 +77,7 @@ export async function addContract(req, res) {
     }
 
     //find out whether another contract is already inside this time range
-    const contracts = await Contract.findInRange(req.body.startDate, req.body.endDate).find({ employeeId: req.body.employeeId}).exec();
+    const contracts = await Contract.findInRange(req.body.startDate, req.body.endDate).find({ employeeId: {$eq: req.body.employeeId}}).exec();
     if(contracts === undefined || contracts.length > 0) {
         res.status(412).send("This contract's time-range interferes with another existing contract of this employee").end();
         return;
@@ -111,7 +111,7 @@ export function getContract(req, res) {
         }else if(!contract){
             res.status(404).send("This contract does not exist!").end();
         }else{
-            if(req.employee.role === "DEVELOPER") { //Check whether dev is allowed to see
+            if(req.employee.role === Role.DEVELOPER) { //Check whether dev is allowed to see
                 if(contract.employeeId !== req.employee._id) {
                     res.status(403).send("Your are not authorized to see this contract!").end();
                     return;
@@ -135,7 +135,7 @@ export async function deleteContract(req, res) {
     }
 
     //current user has to be admin
-    if(req.employee.role !== "ADMINISTRATOR") {
+    if(req.employee.role !== Role.ADMINISTRATOR) {
         res.status(403).send("No admin rights!").end();
         return;
     }
@@ -171,7 +171,7 @@ export async function updateContract(req, res){
     }
 
     //Test whether current user is authorized
-    if(req.employee.role !== "ADMINISTRATOR") {
+    if(req.employee.role !== Role.ADMINISTRATOR) {
         res.status(403).send("No admin rights!").end();
         return;
     }
@@ -210,7 +210,7 @@ export async function updateContract(req, res){
             res.status(404).send("This contract does not exist yet!").end();
         }else{
             //check whether the change time-range could interfere with another existing contract
-            const contracts = await Contract.findInRange(req.body.startDate, req.body.endDate).find({ employeeId: req.body.employeeId}).exec();
+            const contracts = await Contract.findInRange(req.body.startDate, req.body.endDate).find({ employeeId: {$eq: req.body.employeeId}}).exec();
             if(contracts !== undefined) {
                 if(contracts.length >= 1 && contracts[0].id !== contract.id) {
                     res.status(412).send("Changes (time-range) made to this contract interfers with other contract(s)");
