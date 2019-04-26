@@ -2,6 +2,7 @@ import Allocation from '../models/allocation';
 import Employee from '../models/employee';
 import Project from '../models/project';
 import Contract from "../models/contract";
+import * as Role from '../models/roles';
 
 /**
  * Get all allocations
@@ -26,7 +27,7 @@ export async function getAllocations(req, res) {
             return;
         }
 
-        const employee = await Employee.findOne({_id: req.query.employeeId});
+        const employee = await Employee.findOne({_id: {$eq: req.query.employeeId}});
         if(!employee) {
             res.status(404).end();
             return;
@@ -35,7 +36,7 @@ export async function getAllocations(req, res) {
 
     //Check whether the project actually exists
     if(req.query.hasOwnProperty('projectId')) {
-        const project = await Project.findOne({_id: req.query.projectId});
+        const project = await Project.findOne({_id: {$eq: req.query.projectId}});
         if(!project) {
             res.status(404).end();
             return;
@@ -58,8 +59,8 @@ export async function getAllocations(req, res) {
         if (err) res.status(500).end();
 
         let contractIds = [];
-        if(req.employee.role === "DEVELOPER") {
-            let contracts = await Contract.find({employeeId: req.employee._id}).exec();
+        if(req.employee.role === Role.DEVELOPER) {
+            let contracts = await Contract.find({employeeId: {$eq: req.employee._id}}).exec();
             for(const i in contracts) {
                 contractIds.push(contracts[i]._id);
             }
@@ -73,6 +74,8 @@ export async function getAllocations(req, res) {
             let ids = [...new Set(allocations.map(a => a.contractId))]; //alle contractIds der bisherigen allocations
             for(let i = 0; i < ids.length; i++) {
                 let contract = await Contract.findOne({_id: ids[i]}).exec();
+                // WICHTIG: Hier ist der Vergleich mit == korrekt, da nur die Werte verglichen werden dürfen.
+                // === würde falsche Ergebnisse geben.
                 if(contract && contract.employeeId == req.query.employeeId) {
                     contractIds.push(contract._id);
                 }
@@ -93,7 +96,7 @@ export async function getAllocations(req, res) {
  * @returns void
  */
 export async function addAllocation(req, res) {
-    if(req.employee.role === "DEVELOPER") {
+    if(req.employee.role === Role.DEVELOPER) {
         res.status(403).end();
         return;
     }
@@ -113,12 +116,12 @@ export async function addAllocation(req, res) {
         res.status(412).send("projectId has to be a number!").end();
         return;
     }
-    const project = await Project.findOne({_id: req.body.projectId});
+    const project = await Project.findOne({_id: {$eq: req.body.projectId}});
     if(!project) {
         res.status(404).end();
         return;
     } else { //only loading the project once
-        if(req.employee.role === "PROJECTMANAGER") {
+        if(req.employee.role === Role.PROJECTMANAGER) {
             if(project.projectManagerId !== req.employee._id) {
                 res.status(403).end();
                 return;
@@ -148,7 +151,7 @@ export async function addAllocation(req, res) {
         return;
     }
     let contractTotalPercentage = 0;
-    const contract = await Contract.findOne({_id: req.body.contractId});
+    const contract = await Contract.findOne({_id: {$eq: req.body.contractId}});
     if(!contract) {
         res.status(404).end();
         return;
@@ -163,7 +166,7 @@ export async function addAllocation(req, res) {
     }
 
     //check for overbooking
-    const allocations = await Allocation.find({contractId: req.body.contractId}).exec();
+    const allocations = await Allocation.find({contractId: {$eq: req.body.contractId}}).exec();
     let currentSum = 0;
     for(let i in allocations) {
         currentSum += allocations[i].pensumPercentage;
@@ -210,8 +213,8 @@ export function getAllocation(req, res) {
             } else {
                 let isAllowed=false;
 
-                if(req.employee.role === "DEVELOPER") {
-                    let contracts = await Contract.find({employeeId: req.employee._id}).exec();
+                if(req.employee.role === Role.DEVELOPER) {
+                    let contracts = await Contract.find({employeeId: {$eq: req.employee._id}}).exec();
                     for(const i in contracts) {
                         if(allocation.contractId === contracts[i]._id) {
                             isAllowed=true;
@@ -245,7 +248,7 @@ export function deleteAllocation(req, res) {
     }
 
     //Check whether dev
-    if(req.employee.role === "DEVELOPER") {
+    if(req.employee.role === Role.DEVELOPER) {
         res.status(403).end();
         return;
     }
@@ -260,15 +263,15 @@ export function deleteAllocation(req, res) {
         }
 
         let isAllowed=false;
-        if(req.employee.role === "PROJECTMANAGER") {
-            let projects = await Project.find({projectManagerId: req.employee._id}).exec();
+        if(req.employee.role === Role.PROJECTMANAGER) {
+            let projects = await Project.find({projectManagerId: {$eq: req.employee._id}}).exec();
             for(let i in projects) {
                 if(allocation.projectId === projects[i]._id) {
                     isAllowed = true;
                     break;
                 }
             }
-        } else if(req.employee.role === "ADMINISTRATOR") {
+        } else if(req.employee.role === Role.ADMINISTRATOR) {
             isAllowed = true;
         }
 
@@ -294,7 +297,7 @@ export async function updateAllocation(req, res){
     }
 
     //Check whether dev (because no rights)
-    if(req.employee.role === "DEVELOPER") {
+    if(req.employee.role === Role.DEVELOPER) {
         res.status(403).end();
         return;
     }
@@ -315,8 +318,8 @@ export async function updateAllocation(req, res){
         res.status(404).send("Allocation does not exist!").end();
         return;
     } else {
-        if(req.employee.role === "PROJECTMANAGER") {
-            let projects = await Project.find({projectManagerId: req.employee._id}).exec();
+        if(req.employee.role === Role.PROJECTMANAGER) {
+            let projects = await Project.find({projectManagerId: {$eq: req.employee._id}}).exec();
             let isAllowed = false;
             for(let i in projects) {
                 if(projects[i]._id === allocation.projectId) {
@@ -336,12 +339,12 @@ export async function updateAllocation(req, res){
         res.status(412).send("projectId has to be a number!").end();
         return;
     }
-    const project = await Project.findOne({_id: req.body.projectId});
+    const project = await Project.findOne({_id: {$eq: req.body.projectId}});
     if(!project) {
         res.status(404).send("Project does not exist!").end();
         return;
     } else { //only loading the project once
-        if(req.employee.role === "PROJECTMANAGER") {
+        if(req.employee.role === Role.PROJECTMANAGER) {
             if(project.projectManagerId !== req.employee._id) {
                 res.status(403).end();
                 return;
@@ -372,7 +375,7 @@ export async function updateAllocation(req, res){
         return;
     }
     let contractTotalPercentage = 0;
-    const contract = await Contract.findOne({_id: req.body.contractId});
+    const contract = await Contract.findOne({_id: {$eq: req.body.contractId}});
     if(!contract) {
         res.status(404).send("Contract does not exist!").end();
         return;
@@ -387,7 +390,7 @@ export async function updateAllocation(req, res){
     }
 
     //check for overbooking
-    const allocations = await Allocation.find({contractId: req.body.contractId}).exec();
+    const allocations = await Allocation.find({contractId: {$eq: req.body.contractId}}).exec();
     let currentSum = 0;
     for(let i in allocations) {
         if(allocations[i]._id !== allocation._id) { //do not include the allocation we are going to change!
