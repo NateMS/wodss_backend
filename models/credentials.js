@@ -8,6 +8,14 @@ const credentialsSchema = new Schema({
         minlength: 1,
         maxlength: 120,
         unique: true,
+        validate: {
+            validator: function(email) {
+                let re1 = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                let re2 = /.*@invalid.ch/; //prevent invalidationerror after anonymizing the employee
+                return re1.test(String(email).toLowerCase()) || re2.test(String(email).toLowerCase());
+            },
+            message: 'You must provide a valid email address.'
+        }
     },
 
     password: {
@@ -24,21 +32,3 @@ credentialsSchema.methods.comparePassword= function (candidatePassword, callback
 };
 
 export default mongoose.model('Credentials', credentialsSchema);
-/**
- active:
- type: boolean
- id:
- type: integer todo: maybe String
- firstName:
- type: string
- lastName:
- type: string
- emailAddress:
- type: string
- role:
- type: string
- enum:
- - ADMINISTRATOR
- - PROJECTMANAGER
- - DEVELOPER
- */

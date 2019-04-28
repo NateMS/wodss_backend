@@ -140,7 +140,7 @@ export function anonymizeEmployee(req, res) {
       employee.lastName = "ANONYMIZED";
       const salt = bcrypt.genSaltSync(saltRounds);
       const hashedEmail = bcrypt.hashSync(employee.emailAddress, salt);
-      employee.emailAddress = hashedEmail + "@invalid"; //email has to be unique!
+      employee.emailAddress = hashedEmail + "@invalid.ch"; //email has to be unique but not a valid email-address afterwards!
       employee.save((err, saved) => {
         if(err){
           res.status(500).send(err);
