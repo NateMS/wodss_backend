@@ -40,6 +40,7 @@ const allocationSchema = new Schema({
     }
 }, {_id:false} );
 
+//zur Abfrage in einem Time-Range
 allocationSchema.statics.findInRange = function(filterStartDate, filterEndDate) {
     //wenn nur fromDate gegeben ist, dann muss startDate>=filterStartDate || startDate<=filterStartDate<=endDate
     if (typeof filterStartDate !== 'undefined' && typeof filterEndDate === 'undefined') {
@@ -50,7 +51,7 @@ allocationSchema.statics.findInRange = function(filterStartDate, filterEndDate) 
                         { startDate: { $lte: filterStartDate },
                             endDate: { $gte: filterStartDate }}
                     ]} ]});
-        //wenn nur toDate gegeben ist, dann muss endDate<=filterEndDate || startDate<=filterEndDate<=endDate
+    //wenn nur toDate gegeben ist, dann muss endDate<=filterEndDate || startDate<=filterEndDate<=endDate
     } else if (typeof filterStartDate === 'undefined' && typeof filterEndDate !== 'undefined') {
         return this.find({
             $or: [
@@ -59,8 +60,8 @@ allocationSchema.statics.findInRange = function(filterStartDate, filterEndDate) 
                         { startDate: { $lte: filterEndDate },
                             endDate: { $gte: filterEndDate }}
                     ]} ]});
-        //wenn fromDate und toDate gegeben ist, dann muss startDate zwischen filterStartDate und filterEndDate liegen
-        //oder endDate zwischen filterStarrDate und filterEndDate
+    //wenn fromDate und toDate gegeben ist, dann muss startDate zwischen filterStartDate und filterEndDate liegen
+    //oder endDate zwischen filterStarrDate und filterEndDate
     } else if (typeof filterStartDate !== 'undefined' && typeof filterEndDate !== 'undefined') {
         return this.find({
             $or: [
@@ -74,8 +75,8 @@ allocationSchema.statics.findInRange = function(filterStartDate, filterEndDate) 
                         { startDate: { $lte: filterStartDate }},
                         { endDate:   { $gte: filterEndDate }} ]}
             ]});
-    } else { //wenn gar keine Limitierungen gesetzt sind
-        return this.find(); //max 100 zurückgeben?
+    } else {
+        return this.find();
     }
 }
 

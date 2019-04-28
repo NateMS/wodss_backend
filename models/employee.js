@@ -64,21 +64,3 @@ autoIncrement.initialize(mongoose.connection);
 employeeSchema.plugin(autoIncrement.plugin, "Employee");
 
 export default mongoose.model('Employee', employeeSchema);
-/**
-active:
-        type: boolean
-      id:
-        type: integer todo: maybe String
-      firstName:
-        type: string
-      lastName:
-        type: string
-      emailAddress:
-        type: string
-      role:
-        type: string
-        enum:
-          - ADMINISTRATOR
-          - PROJECTMANAGER
-          - DEVELOPER
- */

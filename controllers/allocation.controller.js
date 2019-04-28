@@ -12,6 +12,8 @@ import * as Role from '../models/roles';
  */
 export async function getAllocations(req, res) {
     const query = {};
+
+    //check whether a valid projectId & query it
     if(req.query.hasOwnProperty('projectId')){
         if(isNaN(req.query.projectId)) {
             res.status(412).send("projectId has to be a number!").end();
@@ -43,6 +45,7 @@ export async function getAllocations(req, res) {
         }
     }
 
+    //check the query's time-range
     const a = new Date(req.query.fromDate), b = new Date(req.query.toDate);
     if(req.query.hasOwnProperty("fromDate") && isNaN(a.getTime())) {
         res.status(412).send("Invalid date format for fromDate!").end();
@@ -59,7 +62,7 @@ export async function getAllocations(req, res) {
         if (err) res.status(500).end();
 
         let contractIds = [];
-        if(req.employee.role === Role.DEVELOPER) {
+        if(req.employee.role === Role.DEVELOPER) { //if dev than check for all his contracts and collect the associated allocations
             let contracts = await Contract.find({employeeId: {$eq: req.employee._id}}).exec();
             for(const i in contracts) {
                 contractIds.push(contracts[i]._id);
@@ -69,18 +72,18 @@ export async function getAllocations(req, res) {
                 return contractIds.includes(allocation.contractId);
             });
 
-        } else if(req.query.hasOwnProperty('employeeId')) {
+        } else if(req.query.hasOwnProperty('employeeId')) { //check for all the employee's contracts and collect the associated allocations
             let contractIds = [];
             let ids = [...new Set(allocations.map(a => a.contractId))]; //alle contractIds der bisherigen allocations
             for(let i = 0; i < ids.length; i++) {
                 let contract = await Contract.findOne({_id: ids[i]}).exec();
                 // WICHTIG: Hier ist der Vergleich mit == korrekt, da nur die Werte verglichen werden dürfen.
-                // === würde falsche Ergebnisse geben.
                 if(contract && contract.employeeId == req.query.employeeId) {
                     contractIds.push(contract._id);
                 }
             }
 
+            //remove all allocations, that do not belong to a valid (right to see or explicit filter) contract
             allocations = allocations.filter(function(allocation) {
                 return contractIds.includes(allocation.contractId);
             });
@@ -96,7 +99,7 @@ export async function getAllocations(req, res) {
  * @returns void
  */
 export async function addAllocation(req, res) {
-    if(req.employee.role === Role.DEVELOPER) {
+    if(req.employee.role === Role.DEVELOPER) { //insufficient permissions
         res.status(403).end();
         return;
     }
@@ -107,7 +110,7 @@ export async function addAllocation(req, res) {
         || !req.body.hasOwnProperty('contractId')
         || !req.body.hasOwnProperty('projectId')) {
 
-        res.status(412).end();
+        res.status(412).send("Missing property (startDate, endDate, pensumPercentage, contractId or projectId").end();
         return;
     }
 
@@ -151,11 +154,11 @@ export async function addAllocation(req, res) {
         return;
     }
     let contractTotalPercentage = 0;
-    const contract = await Contract.findOne({_id: {$eq: req.body.contractId}});
+    const contract = await Contract.findOne({_id: {$eq: req.body.contractId}}); //get the allocation's contract
     if(!contract) {
         res.status(404).end();
         return;
-    } else { //is the contract timerange valid for that allocation timerange?
+    } else { //is the contract time-range valid for that allocation time-range?
         const startDate = new Date(req.body.startDate);
         const endDate   = new Date(req.body.endDate);
         if(!(contract.startDate <= startDate && contract.endDate >= endDate)) {
@@ -171,13 +174,13 @@ export async function addAllocation(req, res) {
     for(let i in allocations) {
         currentSum += allocations[i].pensumPercentage;
     }
-    let nextTotalPensum = req.body.pensumPercentage + currentSum;
+    let nextTotalPensum = req.body.pensumPercentage + currentSum; //new total pensum with the new allocation
     if(nextTotalPensum > contractTotalPercentage) {
         res.status(412).send("Overbooking of this contract!").end();
         return;
     }
 
-    //actually try to create allocation
+    //actually try to create allocation (only integers!)
     req.body.pensumPercentage = Math.floor(req.body.pensumPercentage);
     const newAllocation = new Allocation(req.body);
     newAllocation.save((err, saved) => {
@@ -202,8 +205,6 @@ export function getAllocation(req, res) {
         return;
     }
 
-
-
     Allocation.findOne({ _id: {$eq: req.params.id} }).exec(async (err, allocation) => {
         if(err) {
             res.status(500).send(err);
@@ -213,7 +214,7 @@ export function getAllocation(req, res) {
             } else {
                 let isAllowed=false;
 
-                if(req.employee.role === Role.DEVELOPER) {
+                if(req.employee.role === Role.DEVELOPER) { //check whether the dev owns this allocation's contract (set the isAllowed bool-Flag)
                     let contracts = await Contract.find({employeeId: {$eq: req.employee._id}}).exec();
                     for(const i in contracts) {
                         if(allocation.contractId === contracts[i]._id) {
@@ -221,7 +222,7 @@ export function getAllocation(req, res) {
                             break;
                         }
                     }
-                } else {
+                } else { //all other roles have sufficient permissions
                     isAllowed=true;
                 }
 
@@ -247,7 +248,7 @@ export function deleteAllocation(req, res) {
         return;
     }
 
-    //Check whether dev
+    //Check whether dev (prevent db call)
     if(req.employee.role === Role.DEVELOPER) {
         res.status(403).end();
         return;
@@ -263,7 +264,7 @@ export function deleteAllocation(req, res) {
         }
 
         let isAllowed=false;
-        if(req.employee.role === Role.PROJECTMANAGER) {
+        if(req.employee.role === Role.PROJECTMANAGER) { //check whether the current user is the projectmananger of the allocation's project
             let projects = await Project.find({projectManagerId: {$eq: req.employee._id}}).exec();
             for(let i in projects) {
                 if(allocation.projectId === projects[i]._id) {
@@ -296,7 +297,7 @@ export async function updateAllocation(req, res){
         return;
     }
 
-    //Check whether dev (because no rights)
+    //Check whether dev (because no permissions)
     if(req.employee.role === Role.DEVELOPER) {
         res.status(403).end();
         return;
@@ -309,7 +310,7 @@ export async function updateAllocation(req, res){
         || !req.body.hasOwnProperty('contractId')
         || !req.body.hasOwnProperty('projectId')) {
 
-        res.status(412).end();
+        res.status(412).send("Missing property (startDate, endDate, pensumPercentage, contractId or projectId").end();
         return;
     }
 
@@ -318,7 +319,7 @@ export async function updateAllocation(req, res){
         res.status(404).send("Allocation does not exist!").end();
         return;
     } else {
-        if(req.employee.role === Role.PROJECTMANAGER) {
+        if(req.employee.role === Role.PROJECTMANAGER) { //check whether the current user is the projectmananger of the allocation's project
             let projects = await Project.find({projectManagerId: {$eq: req.employee._id}}).exec();
             let isAllowed = false;
             for(let i in projects) {
@@ -352,7 +353,7 @@ export async function updateAllocation(req, res){
         }
     }
 
-    //check startDate & endDate to be from valid format
+    //check startDate & endDate to be from valid format & range
     const a = new Date(req.body.startDate), b = new Date(req.body.endDate);
     if(req.body.hasOwnProperty("startDate") && isNaN(a.getTime())) {
         res.status(412).send("Invalid date format for startDate!").end();
@@ -379,7 +380,7 @@ export async function updateAllocation(req, res){
     if(!contract) {
         res.status(404).send("Contract does not exist!").end();
         return;
-    } else { //is the contract timerange valid for that allocation timerange?
+    } else { //is the contract time-range valid for that allocation time-range?
         const startDate = new Date(req.body.startDate);
         const endDate   = new Date(req.body.endDate);
         if(!(contract.startDate <= startDate && contract.endDate >= endDate)) {
