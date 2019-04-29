@@ -78,12 +78,12 @@ export async function addProject(req, res) {
         return;
     }
 
-    if (!req.body.hasOwnProperty('name')
-        || !req.body.hasOwnProperty('ftePercentage')
-        || !req.body.hasOwnProperty('startDate')
-        || !req.body.hasOwnProperty('endDate')
-        || !req.body.hasOwnProperty('projectManagerId')) {
-        res.status(412).send("Missing property (ftePercentage, startDate, endDate or projectManagerId").end();
+    if (!req.body.hasOwnProperty('name') || !req.body.name
+        || !req.body.hasOwnProperty('ftePercentage') || !req.body.ftePercentage
+        || !req.body.hasOwnProperty('startDate') || !req.body.startDate
+        || !req.body.hasOwnProperty('endDate') || !req.body.endDate
+        || !req.body.hasOwnProperty('projectManagerId') || !req.body.projectManagerId) {
+        res.status(412).send("Missing property (ftePercentage, startDate, endDate or projectManagerId)").end();
         return;
     }
 
@@ -221,12 +221,12 @@ export async function updateProject(req, res) {
     }
 
     //Precondition Check
-    if (!req.body.hasOwnProperty('name')
-        || !req.body.hasOwnProperty('ftePercentage')
-        || !req.body.hasOwnProperty('startDate')
-        || !req.body.hasOwnProperty('endDate')
-        || !req.body.hasOwnProperty('projectManagerId')) {
-        res.status(412).send("Missing property (ftePercentage, startDate, endDate or projectManagerId").end();
+    if (!req.body.hasOwnProperty('name') || !req.body.name
+        || !req.body.hasOwnProperty('ftePercentage') || !req.body.ftePercentage
+        || !req.body.hasOwnProperty('startDate') || !req.body.startDate
+        || !req.body.hasOwnProperty('endDate') || !req.body.endDate
+        || !req.body.hasOwnProperty('projectManagerId') || !req.body.projectManagerId) {
+        res.status(412).send("Missing property (ftePercentage, startDate, endDate or projectManagerId)").end();
         return;
     }
 

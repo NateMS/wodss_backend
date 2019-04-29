@@ -3,8 +3,8 @@ import * as jwt from "jwt-simple";
 import Employee from '../models/employee';
 
 export function createToken(req, res) {
-    if (!req.body.hasOwnProperty('emailAddress')
-        || !req.body.hasOwnProperty('rawPassword')) {
+    if (!req.body.hasOwnProperty('emailAddress') || !req.body.emailAddress
+        || !req.body.hasOwnProperty('rawPassword') || !req.body.rawPassword) {
         res.status(412).end();
         return
     }
@@ -46,7 +46,7 @@ export function createToken(req, res) {
 }
 
 export function refreshToken(req, res){
-    const email = req.user[0].emailAddress;
+    const email = req.user.emailAddress;
     Employee.findOne({emailAddress: {$eq: email}}, function (err, e) {
         if(err){
             return res.status(500).send(err);
@@ -60,7 +60,7 @@ export function refreshToken(req, res){
         const tokenTtl = (Number(process.env.JWT_TTL) || 86400)*1000;
         const timestampExpiration = timestamp + tokenTtl;
         const token = jwt.encode({
-            sub: req.user[0]._id,
+            sub: req.user._id,
             iss: "FHNW Wodss 2019",
             iat: timestamp,
             exp: timestampExpiration,

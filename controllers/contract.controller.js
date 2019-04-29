@@ -48,11 +48,11 @@ export async function addContract(req, res) {
         return;
     }
 
-    if (!req.body.hasOwnProperty('startDate')
-        || !req.body.hasOwnProperty('endDate')
-        || !req.body.hasOwnProperty('pensumPercentage')
-        || !req.body.hasOwnProperty('employeeId')) {
-        res.status(412).send("Missing property (startDate, endDate, pensumPercentage or employeeId").end();
+    if (!req.body.hasOwnProperty('startDate') || !req.body.startDate
+        || !req.body.hasOwnProperty('endDate') || !req.body.endDate
+        || !req.body.hasOwnProperty('pensumPercentage') || !req.body.pensumPercentage
+        || !req.body.hasOwnProperty('employeeId') || !req.body.employeeId) {
+        res.status(412).send("Missing property (startDate, endDate, pensumPercentage or employeeId)").end();
         return;
     }
 
@@ -175,11 +175,12 @@ export async function updateContract(req, res){
         res.status(403).send("No admin rights!").end();
         return;
     }
-    if (!req.body.hasOwnProperty('startDate')
-        || !req.body.hasOwnProperty('endDate')
-        || !req.body.hasOwnProperty('pensumPercentage')
-        || !req.body.hasOwnProperty('employeeId')) {
-        res.status(412).send("Missing property (startDate, endDate, pensumPercentage or employeeId").end();
+
+    if (!req.body.hasOwnProperty('startDate') || !req.body.startDate
+        || !req.body.hasOwnProperty('endDate') || !req.body.endDate
+        || !req.body.hasOwnProperty('pensumPercentage') || !req.body.pensumPercentage
+        || !req.body.hasOwnProperty('employeeId') || !req.body.employeeId) {
+        res.status(412).send("Missing property (startDate, endDate, pensumPercentage or employeeId)").end();
         return;
     }
 
