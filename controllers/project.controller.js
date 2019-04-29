@@ -264,7 +264,12 @@ export async function updateProject(req, res) {
         await Allocation.deleteMany({$and: [{projectId: {$eq: req.params.id}}, {startDate: {$gt: req.body.endDate}}]}).exec();
 
         //adjust endDate of all allocations to actual projectend's date
-        await Allocation.updateMany({$and: [{projectId: {$eq: req.params.id}}, {startDate: {$lte: req.body.endDate}}]},
+        await Allocation.updateMany(
+            {$and: [
+                {projectId: {$eq: req.params.id}},
+                {startDate: {$lte: req.body.endDate}},
+                {endDate: {$gt: req.body.endDate}}
+            ]},
             {endDate: req.body.endDate}).exec();
     }
 

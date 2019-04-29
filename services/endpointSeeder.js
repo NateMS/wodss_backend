@@ -6,9 +6,12 @@ let seed = require('../services/seed');
 
 import * as bcrypt from "bcrypt";
 import Credentials from "../models/credentials";
+import * as adminSeeder from "./defaultAdminSeeder";
+import * as Roles from "../models/roles";
 const saltRounds = 10;
 
 let employeeIds   = [];
+let pmIds         = [];
 let projectIds    = [];
 let contractIds   = [];
 let allocationIds = [];
@@ -21,7 +24,7 @@ export async function seedDB() {
 
 async function seedEndpoints() {
     let i;
-
+    await adminSeeder.seed(); // workaround for admin-seeder
     for(i=0; i < seed.employees.length; i++) {
         let e = Employee(seed.employees[i]);
         const salt = bcrypt.genSaltSync(saltRounds);
@@ -29,12 +32,16 @@ async function seedEndpoints() {
         const newCredentials = new Credentials({emailAddress: e.emailAddress, password: hashedPassword});
         await newCredentials.save();
         e = await e.save();
+
         employeeIds.push(e.id);
+        if(e.role === Roles.PROJECTMANAGER){
+            pmIds.push(e.id);
+        }
     }
 
     for(i=0; i < seed.projects.length; i++) {
         let e = Project(seed.projects[i]);
-        e.projectManagerId = employeeIds[i%2+1];
+        e.projectManagerId = pmIds[0];
         e = await e.save();
         projectIds.push(e.id);
     }
@@ -48,7 +55,7 @@ async function seedEndpoints() {
 
     for(i=0; i < seed.allocations.length; i++) {
         let e = Allocation(seed.allocations[i]);
-        e.contractId = contractIds[i%3];
+        e.contractId = contractIds[i];
         e.projectId  = projectIds[i%3];
         e = await e.save();
         allocationIds.push(e.id);

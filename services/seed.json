@@ -6,31 +6,47 @@
       "active": true,
       "emailAddress": "adrian.tute@students.fhnw.ch",
       "role": "ADMINISTRATOR",
-      "password": "AMKJUNGE110"
+      "password": "secret"
     },
     {
-      "firstName": "Deine",
-      "lastName": "Mutter",
+      "firstName": "Fabian",
+      "lastName": "Wildhaber",
       "active": true,
-      "emailAddress": "deine.mutter@students.fhnw.ch",
-      "role": "PROJECTMANAGER",
-      "password": "AMKJUNGE110"
+      "emailAddress": "fabian.wildhaber@students.fhnw.ch",
+      "role": "ADMINISTRATOR",
+      "password": "secret"
     },
     {
-      "firstName": "Deine",
-      "lastName": "Mutter2",
+      "firstName": "Nadim",
+      "lastName": "Salloum",
       "active": true,
-      "emailAddress": "deine.mutter2@students.fhnw.ch",
-      "role": "PROJECTMANAGER",
-      "password": "AMKJUNGE110"
+      "emailAddress": "nadim.salloum@students.fhnw.ch",
+      "role": "ADMINISTRATOR",
+      "password": "secret"
     },
     {
       "firstName": "Manuel",
       "lastName": "Stutz",
       "active": true,
       "emailAddress": "manuel.stutz@students.fhnw.ch",
+      "role": "ADMINISTRATOR",
+      "password": "secret"
+    },
+    {
+      "firstName": "Test",
+      "lastName": "Developer",
+      "active": true,
+      "emailAddress": "developer@students.fhnw.ch",
       "role": "DEVELOPER",
-      "password": "AMKJUNGE110"
+      "password": "secret"
+    },
+    {
+      "firstName": "Freddy",
+      "lastName": "the PM",
+      "active": true,
+      "emailAddress": "projectmanager@students.fhnw.ch",
+      "role": "PROJECTMANAGER",
+      "password": "secret"
     }
   ],
   "projects": [
@@ -54,6 +70,21 @@
     }
   ],
   "contracts": [
+    {
+      "startDate": "2019-01-01",
+      "endDate": "2019-12-31",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2019-01-01",
+      "endDate": "2019-12-31",
+      "pensumPercentage": 100
+    },
+    {
+      "startDate": "2019-01-01",
+      "endDate": "2019-12-31",
+      "pensumPercentage": 100
+    },
     {
       "startDate": "2019-01-01",
       "endDate": "2019-12-31",
