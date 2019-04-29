@@ -41,12 +41,12 @@ export function getEmployees(req, res) {
  * @returns void
  */
 export function addEmployee(req, res) {
-  if (!req.body.hasOwnProperty('firstName')
-      || !req.body.hasOwnProperty('lastName')
-      || !req.body.hasOwnProperty('emailAddress')
-      || !req.query.hasOwnProperty('password')
-      || !req.query.hasOwnProperty('role')) {
-    res.status(412).send("Missing property (firstName, lastName, emailAddress, password or role").end();
+  if (!req.body.hasOwnProperty('firstName') || !req.body.firstName
+      || !req.body.hasOwnProperty('lastName') || !req.body.lastName
+      || !req.body.hasOwnProperty('emailAddress') || !req.body.emailAddress
+      || !req.query.hasOwnProperty('password') || !req.body.password
+      || !req.query.hasOwnProperty('role') || !req.body.role) {
+    res.status(412).send("Missing property (firstName, lastName, emailAddress, password or role)").end();
     return
   }
 
@@ -169,10 +169,10 @@ export function updateEmployee(req, res){
   }
 
   if(!req.body.hasOwnProperty('active')
-      || !req.body.hasOwnProperty('firstName')
-      || !req.body.hasOwnProperty('lastName')
-      || !req.body.hasOwnProperty('emailAddress')){
-    res.status(412).send("Missing property (active, firstName, lastName or emailAddress").end();
+      || !req.body.hasOwnProperty('firstName') || !req.body.firstName
+      || !req.body.hasOwnProperty('lastName') || !req.body.lastName
+      || !req.body.hasOwnProperty('emailAddress') || !req.body.emailAddress){
+    res.status(412).send("Missing property (active, firstName, lastName or emailAddress)").end();
     return;
   }
 
