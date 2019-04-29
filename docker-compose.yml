@@ -9,5 +9,12 @@ services:
           - "3090:3090"
         depends_on:
           - mongodb
+        volumes:
+          - .env:/data/.env
     mongodb:
         image: mongo
+        volumes:
+            - db:/data/db
+
+volumes:
+    db:
