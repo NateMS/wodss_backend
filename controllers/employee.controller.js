@@ -44,8 +44,8 @@ export function addEmployee(req, res) {
   if (!req.body.hasOwnProperty('firstName') || !req.body.firstName
       || !req.body.hasOwnProperty('lastName') || !req.body.lastName
       || !req.body.hasOwnProperty('emailAddress') || !req.body.emailAddress
-      || !req.query.hasOwnProperty('password') || !req.body.password
-      || !req.query.hasOwnProperty('role') || !req.body.role) {
+      || !req.query.hasOwnProperty('password') || !req.query.password
+      || !req.query.hasOwnProperty('role') || !req.query.role) {
     res.status(412).send("Missing property (firstName, lastName, emailAddress, password or role)").end();
     return
   }
