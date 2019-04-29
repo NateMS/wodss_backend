@@ -50,8 +50,8 @@ export async function addContract(req, res) {
 
     if (!req.body.hasOwnProperty('startDate') || !req.body.startDate
         || !req.body.hasOwnProperty('endDate') || !req.body.endDate
-        || !req.body.hasOwnProperty('pensumPercentage') || !req.body.pensumPercentage
-        || !req.body.hasOwnProperty('employeeId') || !req.body.employeeId) {
+        || !req.body.hasOwnProperty('pensumPercentage') || isNaN(req.body.pensumPercentage)
+        || !req.body.hasOwnProperty('employeeId') || isNaN(req.body.employeeId)) {
         res.status(412).send("Missing property (startDate, endDate, pensumPercentage or employeeId)").end();
         return;
     }
@@ -178,8 +178,8 @@ export async function updateContract(req, res){
 
     if (!req.body.hasOwnProperty('startDate') || !req.body.startDate
         || !req.body.hasOwnProperty('endDate') || !req.body.endDate
-        || !req.body.hasOwnProperty('pensumPercentage') || !req.body.pensumPercentage
-        || !req.body.hasOwnProperty('employeeId') || !req.body.employeeId) {
+        || !req.body.hasOwnProperty('pensumPercentage') || isNaN(req.body.pensumPercentage)
+        || !req.body.hasOwnProperty('employeeId') || isNaN(req.body.employeeId)) {
         res.status(412).send("Missing property (startDate, endDate, pensumPercentage or employeeId)").end();
         return;
     }

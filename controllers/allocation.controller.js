@@ -104,11 +104,13 @@ export async function addAllocation(req, res) {
         return;
     }
 
+    if (!req.body.hasOwnProperty('contractId') || isNaN(req.body.contractId)){
+        res.status(412).send("No contract found.");
+    }
     if (!req.body.hasOwnProperty('startDate') || !req.body.startDate
         || !req.body.hasOwnProperty('endDate') || !req.body.endDate
-        || !req.body.hasOwnProperty('pensumPercentage') || !req.body.pensumPercentage
-        || !req.body.hasOwnProperty('contractId') || !req.body.contractId
-        || !req.body.hasOwnProperty('projectId') || !req.body.projectId) {
+        || !req.body.hasOwnProperty('pensumPercentage') || isNaN(req.body.pensumPercentage)
+        || !req.body.hasOwnProperty('projectId') || isNaN(req.body.projectId)) {
 
         res.status(412).send("Missing property (startDate, endDate, pensumPercentage, contractId or projectId)").end();
         return;
@@ -306,9 +308,9 @@ export async function updateAllocation(req, res){
     //check all fields to be present
     if (!req.body.hasOwnProperty('startDate') || !req.body.startDate
         || !req.body.hasOwnProperty('endDate') || !req.body.endDate
-        || !req.body.hasOwnProperty('pensumPercentage') || !req.body.pensumPercentage
-        || !req.body.hasOwnProperty('contractId') || !req.body.contractId
-        || !req.body.hasOwnProperty('projectId') || !req.body.projectId) {
+        || !req.body.hasOwnProperty('pensumPercentage') || isNaN(req.body.pensumPercentage)
+        || !req.body.hasOwnProperty('contractId') || isNaN(req.body.contractId)
+        || !req.body.hasOwnProperty('projectId') || isNaN(req.body.projectId)) {
 
         res.status(412).send("Missing property (startDate, endDate, pensumPercentage, contractId or projectId)").end();
         return;
