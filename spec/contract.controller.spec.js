@@ -125,7 +125,7 @@ let devToken;
 describe('testing the contract endpoint', () => {
     beforeAll(async function() {
         for (let i = 0; i < 40; i++) {
-            const numElems1 = await Project.countDocuments().exec();
+            const numElems1 = await Contract.countDocuments().exec();
             countContractsBefore = await numElems1;
         }
         let i;
