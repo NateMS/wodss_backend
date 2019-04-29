@@ -18,13 +18,14 @@ let allocationIds = [];
 
 export async function seedDB() {
     console.log("Setting up test data");
-    resetEndpoints();
+    await resetEndpoints();
+    console.log("Resettet Endpoints");
     await seedEndpoints();
+    console.log("Seeded");
 }
 
 async function seedEndpoints() {
     let i;
-    await adminSeeder.seed(); // workaround for admin-seeder
     for(i=0; i < seed.employees.length; i++) {
         let e = Employee(seed.employees[i]);
         const salt = bcrypt.genSaltSync(saltRounds);
@@ -62,12 +63,35 @@ async function seedEndpoints() {
     }
 }
 
-function resetEndpoints() {
-    Promise.all([
-        Employee.deleteMany().exec(),
-        Project.deleteMany().exec(),
-        Allocation.deleteMany().exec(),
-        Contract.deleteMany().exec(),
-        Credentials.deleteMany().exec()
-    ]).then(() => { return; });
+async function resetEndpoints() {
+    const emps = [];
+    let pmId;
+    for(let i in seed.employees) {
+        const e = await Employee.findOne({ emailAddress: { $eq: seed.employees[i].emailAddress }}).exec();
+        await Credentials.deleteOne({ emailAddress: { $eq: seed.employees[i].emailAddress}}).exec();
+        if(e) {
+            if(e.role === Roles.PROJECTMANAGER) {
+                pmId = e.id;
+            }
+            emps.push(e.id);
+            await Employee.deleteOne({ _id: { $eq: e.id}}).exec();
+        }
+    }
+
+    const projs = await Project.find({ projectManagerId: { $eq: pmId }}).exec();
+    for(let i in projs) {
+        await Project.deleteOne({ _id: { $eq: projs[i].id }}).exec();
+    }
+
+    const contractIds = [];
+    const contracts = await Contract.find({ employeeId: { $in: emps }}).exec();
+    for(let i in contracts) {
+        await Contract.deleteOne({ _id: { $eq: contracts[i].id }}).exec();
+        contractIds.push(contracts[i].id);
+    }
+
+    const allocations = await Allocation.find({ contractId: { $in: contractIds }}).exec();
+    for(let i in allocations) {
+        await Allocation.deleteOne({ _id: { $eq: allocations[i].id }}).exec();
+    }
 }
