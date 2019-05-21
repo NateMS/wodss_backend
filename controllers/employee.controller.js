@@ -56,7 +56,9 @@ export function addEmployee(req, res) {
   }
 
   const newEmployee = new Employee(req.body);
-  newEmployee.active = false; //needs to be set active manually by an admin!
+  /*if(!req.body.hasOwnProperty('active')){
+    newEmployee.active = false; //needs to be set active manually by an admin!
+  }*/
   newEmployee.role   = req.query.role;
 
   const salt = bcrypt.genSaltSync(saltRounds);
