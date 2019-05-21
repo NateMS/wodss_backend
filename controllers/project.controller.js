@@ -29,10 +29,6 @@ export async function getProjects(req, res) {
 
     if (req.query.hasOwnProperty('projectManagerId')) {
         const projectManagerId = req.query.projectManagerId;
-        if (isNaN(projectManagerId)) { //prevent 500
-            res.status(412).send("projectManagerId has to be a number!").end();
-            return;
-        }
 
         query["projectManagerId"] = {$eq: projectManagerId};
 
@@ -82,7 +78,7 @@ export async function addProject(req, res) {
         || !req.body.hasOwnProperty('ftePercentage') || isNaN(req.body.ftePercentage)
         || !req.body.hasOwnProperty('startDate') || !req.body.startDate
         || !req.body.hasOwnProperty('endDate') || !req.body.endDate
-        || !req.body.hasOwnProperty('projectManagerId') || isNaN(req.body.projectManagerId)) {
+        || !req.body.hasOwnProperty('projectManagerId')) {
         res.status(412).send("Missing property (ftePercentage, startDate, endDate or projectManagerId)").end();
         return;
     }
@@ -132,11 +128,6 @@ export async function addProject(req, res) {
  * @returns void
  */
 export async function getProject(req, res) {
-    if (isNaN(req.params.id)) {
-        res.status(412).send("id param has to be a number!").end();
-        return;
-    }
-
     if (req.employee.role === Role.DEVELOPER) { //check whether dev is allowed to see the project
         const contractIds = [];
         const allocations = await Allocation.find({projectId: {$eq: req.params.id}});
@@ -175,11 +166,6 @@ export async function getProject(req, res) {
  * @returns void
  */
 export async function deleteProject(req, res) {
-    if (isNaN(req.params.id)) {
-        res.status(412).send("id param has to be a number!").end();
-        return;
-    }
-
     if (req.employee.role !== Role.ADMINISTRATOR) {
         res.status(403).send("No admin rights!").end();
         return;
@@ -200,11 +186,6 @@ export async function deleteProject(req, res) {
  * @param res
  */
 export async function updateProject(req, res) {
-    if (isNaN(req.params.id)) {
-        res.status(412).send("id param has to be a number!").end();
-        return;
-    }
-
     if (req.employee.role === Role.DEVELOPER) { //dev is not allowed
         res.status(403).send("Missing permissions!").end();
         return;
@@ -225,7 +206,7 @@ export async function updateProject(req, res) {
         || !req.body.hasOwnProperty('ftePercentage') || isNaN(req.body.ftePercentage)
         || !req.body.hasOwnProperty('startDate') || !req.body.startDate
         || !req.body.hasOwnProperty('endDate') || !req.body.endDate
-        || !req.body.hasOwnProperty('projectManagerId') || isNaN(req.body.projectManagerId)) {
+        || !req.body.hasOwnProperty('projectManagerId')) {
         res.status(412).send("Missing property (ftePercentage, startDate, endDate or projectManagerId)").end();
         return;
     }

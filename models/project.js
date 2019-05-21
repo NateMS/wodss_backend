@@ -3,13 +3,6 @@ import * as autoIncrement from "mongoose-auto-increment";
 const Schema = mongoose.Schema;
 
 const projectSchema = new Schema({
-    _id: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 9223372036854776000
-    },
-
     name: {
         type: String,
         minlength: 1,
@@ -35,10 +28,10 @@ const projectSchema = new Schema({
     },
 
     projectManagerId: {
-        type: Number,
+        type: String,
         ref: 'Employee'
     }
-}, {_id:false});
+});
 
 //zur Abfrage in einem Time-Range
 projectSchema.statics.findInRange = function(filterStartDate, filterEndDate) {
@@ -91,7 +84,7 @@ projectSchema.set('toJSON', {
     },
 });
 
-autoIncrement.initialize(mongoose.connection);
-projectSchema.plugin(autoIncrement.plugin, "Project");
+//autoIncrement.initialize(mongoose.connection);
+//projectSchema.plugin(autoIncrement.plugin, "Project");
 
 export default mongoose.model('Project', projectSchema);

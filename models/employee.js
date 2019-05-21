@@ -3,13 +3,6 @@ import * as autoIncrement from "mongoose-auto-increment";
 const Schema = mongoose.Schema;
 
 const employeeSchema = new Schema({
-  _id: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 9223372036854776000
-  },
-
   active: {
     type: Boolean,
   },
@@ -47,7 +40,7 @@ const employeeSchema = new Schema({
     type: String,
     enum: ['ADMINISTRATOR', 'PROJECTMANAGER', 'DEVELOPER'],
   },
-}, {_id: false });
+});
 
 employeeSchema.virtual('id').get(function () { return this._id; });
 employeeSchema.virtual('id').set(function (i) { this._id = i; });
@@ -60,7 +53,7 @@ employeeSchema.set('toJSON', {
   },
 });
 
-autoIncrement.initialize(mongoose.connection);
-employeeSchema.plugin(autoIncrement.plugin, "Employee");
+//autoIncrement.initialize(mongoose.connection);
+//employeeSchema.plugin(autoIncrement.plugin, "Employee");
 
 export default mongoose.model('Employee', employeeSchema);

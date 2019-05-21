@@ -15,20 +15,11 @@ export async function getAllocations(req, res) {
 
     //check whether a valid projectId & query it
     if(req.query.hasOwnProperty('projectId')){
-        if(isNaN(req.query.projectId)) {
-            res.status(412).send("projectId has to be a number!").end();
-            return;
-        }
         query["projectId"] = {$eq: req.query.projectId};
     }
 
     //Check whether the employee actually exists
     if(req.query.hasOwnProperty('employeeId')) {
-        if(isNaN(req.query.employeeId)) {
-            res.status(412).send("employeeId has to be a number!").end();
-            return;
-        }
-
         const employee = await Employee.findOne({_id: {$eq: req.query.employeeId}});
         if(!employee) {
             res.status(404).end();
@@ -104,23 +95,18 @@ export async function addAllocation(req, res) {
         return;
     }
 
-    if (!req.body.hasOwnProperty('contractId') || isNaN(req.body.contractId)){
+    if (!req.body.hasOwnProperty('contractId')){
         res.status(412).send("No contract found.");
     }
     if (!req.body.hasOwnProperty('startDate') || !req.body.startDate
         || !req.body.hasOwnProperty('endDate') || !req.body.endDate
         || !req.body.hasOwnProperty('pensumPercentage') || isNaN(req.body.pensumPercentage)
-        || !req.body.hasOwnProperty('projectId') || isNaN(req.body.projectId)) {
+        || !req.body.hasOwnProperty('projectId')) {
 
         res.status(412).send("Missing property (startDate, endDate, pensumPercentage, contractId or projectId)").end();
         return;
     }
 
-    //Check whether the project actually exists
-    if(isNaN(req.body.projectId)) {
-        res.status(412).send("projectId has to be a number!").end();
-        return;
-    }
     const project = await Project.findOne({_id: {$eq: req.body.projectId}});
     if(!project) {
         res.status(404).end();
@@ -146,11 +132,6 @@ export async function addAllocation(req, res) {
         return;
     }
 
-    //Check whether the contract actually exists
-    if(isNaN(req.body.contractId)) {
-        res.status(412).send("contractId has to be a number!").end();
-        return;
-    }
     if(isNaN(req.body.pensumPercentage)) {
         res.status(412).send("pensumPercentage has to be a number!").end();
         return;
@@ -174,11 +155,11 @@ export async function addAllocation(req, res) {
     const allocations = await Allocation.find({contractId: {$eq: req.body.contractId}}).exec();
     let currentSum = 0;
     for(let i in allocations) {
-        currentSum += allocations[i].pensumPercentage;
+        currentSum += parseInt(allocations[i].pensumPercentage);
     }
-    let nextTotalPensum = req.body.pensumPercentage + currentSum; //new total pensum with the new allocation
+    let nextTotalPensum = parseInt(req.body.pensumPercentage) + currentSum; //new total pensum with the new allocation
     if(nextTotalPensum > contractTotalPercentage) {
-        res.status(412).send("Overbooking of this contract!").end();
+        res.status(412).send("Overbooking of this contract!" + currentSum + ", " + nextTotalPensum + ", " + contractTotalPercentage).end();
         return;
     }
 
@@ -202,10 +183,6 @@ export async function addAllocation(req, res) {
  */
 export function getAllocation(req, res) {
     //Check whether the contract actually exists
-    if(isNaN(req.params.id)) {
-        res.status(412).send("id param has to be a number!").end();
-        return;
-    }
 
     Allocation.findOne({ _id: {$eq: req.params.id} }).exec(async (err, allocation) => {
         if(err) {
@@ -245,11 +222,6 @@ export function getAllocation(req, res) {
  * @returns void
  */
 export function deleteAllocation(req, res) {
-    if(isNaN(req.params.id)) {
-        res.status(412).send("id param has to be a number!").end();
-        return;
-    }
-
     //Check whether dev (prevent db call)
     if(req.employee.role === Role.DEVELOPER) {
         res.status(403).end();
@@ -294,11 +266,6 @@ export function deleteAllocation(req, res) {
  * @param res
  */
 export async function updateAllocation(req, res){
-    if(isNaN(req.params.id)) {
-        res.status(412).send("id param has to be a number!").end();
-        return;
-    }
-
     //Check whether dev (because no permissions)
     if(req.employee.role === Role.DEVELOPER) {
         res.status(403).end();
@@ -309,8 +276,8 @@ export async function updateAllocation(req, res){
     if (!req.body.hasOwnProperty('startDate') || !req.body.startDate
         || !req.body.hasOwnProperty('endDate') || !req.body.endDate
         || !req.body.hasOwnProperty('pensumPercentage') || isNaN(req.body.pensumPercentage)
-        || !req.body.hasOwnProperty('contractId') || isNaN(req.body.contractId)
-        || !req.body.hasOwnProperty('projectId') || isNaN(req.body.projectId)) {
+        || !req.body.hasOwnProperty('contractId')
+        || !req.body.hasOwnProperty('projectId')) {
 
         res.status(412).send("Missing property (startDate, endDate, pensumPercentage, contractId or projectId)").end();
         return;
@@ -337,11 +304,6 @@ export async function updateAllocation(req, res){
         }
     }
 
-    //Check whether the project actually exists
-    if(isNaN(req.body.projectId)) {
-        res.status(412).send("projectId has to be a number!").end();
-        return;
-    }
     const project = await Project.findOne({_id: {$eq: req.body.projectId}});
     if(!project) {
         res.status(404).send("Project does not exist!").end();
@@ -369,10 +331,6 @@ export async function updateAllocation(req, res){
     }
 
     //Check whether the contract actually exists
-    if(isNaN(req.body.contractId)) {
-        res.status(412).send("contractId has to be a number!").end();
-        return;
-    }
     if(isNaN(req.body.pensumPercentage)) {
         res.status(412).send("pensumPercentage has to be a number!").end();
         return;

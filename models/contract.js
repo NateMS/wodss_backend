@@ -3,13 +3,6 @@ import * as autoIncrement from "mongoose-auto-increment";
 const Schema = mongoose.Schema;
 
 const contractSchema = new Schema({
-    _id: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 9223372036854776000
-    },
-
     startDate: {
         type: Date,
         required: true,
@@ -28,11 +21,11 @@ const contractSchema = new Schema({
     },
 
     employeeId: {
-        type: Number,
+        type: String,
         ref: 'Employee',
         required: true
     }
-}, {_id:false} );
+});
 
 //zur Abfrage in einem Time-Range
 contractSchema.statics.findInRange = function(filterStartDate, filterEndDate) {
@@ -85,7 +78,7 @@ contractSchema.set('toJSON', {
     },
 });
 
-autoIncrement.initialize(mongoose.connection);
-contractSchema.plugin(autoIncrement.plugin, "Contract");
+//autoIncrement.initialize(mongoose.connection);
+//contractSchema.plugin(autoIncrement.plugin, "Contract");
 
 export default mongoose.model('Contract', contractSchema);

@@ -97,11 +97,6 @@ export function addEmployee(req, res) {
  * @returns void
 */
 export function getEmployee(req, res) {
-  if(isNaN(req.params.id)) {
-    res.status(412).send("id param has to be a number!").end();
-    return;
-  }
-
   Employee.findOne({ _id: {$eq: req.params.id} }).exec((err, employee) => {
     if (err) {
       res.status(500).send(err);
@@ -120,11 +115,6 @@ export function getEmployee(req, res) {
  * @returns void
 */
 export function anonymizeEmployee(req, res) {
-  if(isNaN(req.params.id)) {
-    res.status(412).send("id param has to be a number!").end();
-    return;
-  }
-
   if(req.employee.role !== Role.ADMINISTRATOR) { //only admin has the ability
     res.status(403).send("No admin rights!").end();
     return;
@@ -160,11 +150,6 @@ export function anonymizeEmployee(req, res) {
  * @param res
  */
 export function updateEmployee(req, res){
-  if(isNaN(req.params.id)) {
-    res.status(412).send("id param has to be a number!").end();
-    return;
-  }
-
   if(req.employee.role !== Role.ADMINISTRATOR) {
     res.status(403).send("No admin rights!").end();
     return;

@@ -3,13 +3,6 @@ import * as autoIncrement from "mongoose-auto-increment";
 const Schema = mongoose.Schema;
 
 const allocationSchema = new Schema({
-    _id: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 9223372036854776000
-    },
-
     startDate: {
         type: Date,
         required: true,
@@ -28,17 +21,17 @@ const allocationSchema = new Schema({
     },
 
     contractId: {
-        type: Number,
+        type: String,
         ref: 'Contract',
         required: true,
     },
 
     projectId: {
-        type: Number,
+        type: String,
         ref: 'Project',
         required: true
     }
-}, {_id:false} );
+} );
 
 //zur Abfrage in einem Time-Range
 allocationSchema.statics.findInRange = function(filterStartDate, filterEndDate) {
@@ -91,8 +84,8 @@ allocationSchema.set('toJSON', {
     },
 });
 
-autoIncrement.initialize(mongoose.connection);
-allocationSchema.plugin(autoIncrement.plugin, "Allocation");
+//autoIncrement.initialize(mongoose.connection);
+//allocationSchema.plugin(autoIncrement.plugin, "Allocation");
 
 export default mongoose.model('Allocation', allocationSchema);
 

@@ -51,7 +51,7 @@ export async function addContract(req, res) {
     if (!req.body.hasOwnProperty('startDate') || !req.body.startDate
         || !req.body.hasOwnProperty('endDate') || !req.body.endDate
         || !req.body.hasOwnProperty('pensumPercentage') || isNaN(req.body.pensumPercentage)
-        || !req.body.hasOwnProperty('employeeId') || isNaN(req.body.employeeId)) {
+        || !req.body.hasOwnProperty('employeeId')) {
         res.status(412).send("Missing property (startDate, endDate, pensumPercentage or employeeId)").end();
         return;
     }
@@ -100,11 +100,6 @@ export async function addContract(req, res) {
  * @returns void
  */
 export function getContract(req, res) {
-    if(isNaN(req.params.id)) {
-        res.status(412).send("id param has to be a number!").end();
-        return;
-    }
-
     Contract.findOne({ _id: {$eq: req.params.id} }).exec((err, contract) => {
         if (err) {
             res.status(500).send(err);
@@ -129,11 +124,6 @@ export function getContract(req, res) {
  * @returns void
  */
 export async function deleteContract(req, res) {
-    if(isNaN(req.params.id)) {
-        res.status(412).send("id param has to be a number!").end();
-        return;
-    }
-
     //current user has to be admin
     if(req.employee.role !== Role.ADMINISTRATOR) {
         res.status(403).send("No admin rights!").end();
@@ -165,11 +155,6 @@ export async function deleteContract(req, res) {
  * @param res
  */
 export async function updateContract(req, res){
-    if(isNaN(req.params.id)) {
-        res.status(412).send("id param has to be a number!").end();
-        return;
-    }
-
     //Test whether current user is authorized
     if(req.employee.role !== Role.ADMINISTRATOR) {
         res.status(403).send("No admin rights!").end();
@@ -179,7 +164,7 @@ export async function updateContract(req, res){
     if (!req.body.hasOwnProperty('startDate') || !req.body.startDate
         || !req.body.hasOwnProperty('endDate') || !req.body.endDate
         || !req.body.hasOwnProperty('pensumPercentage') || isNaN(req.body.pensumPercentage)
-        || !req.body.hasOwnProperty('employeeId') || isNaN(req.body.employeeId)) {
+        || !req.body.hasOwnProperty('employeeId')) {
         res.status(412).send("Missing property (startDate, endDate, pensumPercentage or employeeId)").end();
         return;
     }
